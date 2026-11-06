@@ -306,7 +306,11 @@ export const IndiaDisasterHistoryPage: React.FC = () => {
 
       // Load geospatial zones from FastAPI backend / MongoDB
       fetch('/api/gis/risk-zones')
-        .then((res) => (res.ok ? res.json() : null))
+        .then((res) => {
+          if (!res.ok) return null;
+          const ct = res.headers.get('content-type') || '';
+          return ct.includes('application/json') ? res.json() : null;
+        })
         .then((data) => {
           if (!data?.features) return;
           const src = map.getSource('db-geospatial-zones') as maplibregl.GeoJSONSource | undefined;

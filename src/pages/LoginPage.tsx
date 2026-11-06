@@ -214,7 +214,8 @@ export const LoginPage: React.FC = () => {
         body: JSON.stringify({ email: emailOrPhone.trim(), password }),
       });
 
-      if (response.ok) {
+      const ct = response.headers.get('content-type') || '';
+      if (response.ok && ct.includes('application/json')) {
         const data = await response.json();
         const preset = ORGANISATION_PRESETS[selectedAuthority.id] || ORGANISATION_PRESETS.state;
 

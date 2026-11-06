@@ -603,7 +603,11 @@ export const SimplifiedMapPage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     fetch('/api/gis/risk-zones')
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        if (!res.ok) return null;
+        const ct = res.headers.get('content-type') || '';
+        return ct.includes('application/json') ? res.json() : null;
+      })
       .then((data) => {
         if (!isMounted || !data?.features) return;
         const mongoZones = data.features.map((f: any) => {

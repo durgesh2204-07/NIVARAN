@@ -8,7 +8,8 @@ import {
   RegionComparisonItem,
 } from '../types/regions';
 
-const BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+const BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || (isHttps ? '' : 'http://127.0.0.1:8000');
 
 export interface SearchRegionResult {
   id: string;
