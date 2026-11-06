@@ -195,9 +195,11 @@ export const App: React.FC = () => {
     };
   }, [setOfflineSimulated]);
 
+  const baseUrl = (import.meta as unknown as { env?: { BASE_URL?: string } })?.env?.BASE_URL || '/';
+
   return (
     <AppErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter basename={baseUrl}>
         <GlobalDomTranslator />
 
         {chunkNeedsReload && (
