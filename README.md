@@ -6,6 +6,27 @@
 
 ---
 
+## 🚀 1-Click Instant Zero-Error Deployment Links
+
+Deploy this production-ready application instantly with preconfigured WebGL, MapLibre CSP, and SPA routing rewrites:
+
+| Platform | Deployment Type | 1-Click Deploy URL | Live URL |
+|---|---|---|---|
+| **Netlify** | 1-Click Connect & Deploy | [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/durgesh2204-07/NIVARAN) | [`https://nivarangis.netlify.app`](https://nivarangis.netlify.app) |
+| **Vercel** | 1-Click Connect & Deploy | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/durgesh2204-07/NIVARAN) | Instant Vercel Edge CDN |
+| **GitHub Pages** | Automated GitHub Actions | [Trigger GitHub Workflow](https://github.com/durgesh2204-07/NIVARAN/actions/workflows/deploy.yml) | [`https://durgesh2204-07.github.io/NIVARAN/`](https://durgesh2204-07.github.io/NIVARAN/) |
+
+### Verified Deployment Configuration
+
+- **Repository URL:** `https://github.com/durgesh2204-07/NIVARAN.git`
+- **Branch:** `main`
+- **Build Command:** `npm run build`
+- **Publish / Output Directory:** `dist`
+- **Node.js Version:** `20` (Configured in `netlify.toml` and `.github/workflows/deploy.yml`)
+- **SPA Routing Configuration:** Handled automatically via `netlify.toml`, `public/_headers`, `public/_redirects`, and `vercel.json`
+
+---
+
 ## 1. System Overview & Mission
 
 **NIVARAN GIS 2.0** is an enterprise-grade, GIS-first geospatial decision support system (DSS) designed to help authorized government officials identify hazardous habitations, evaluate people and critical infrastructure exposed to risk, assess safe candidate relocation sites, calculate realistic carrying capacity under restrictive physical constraints, prioritize relocation needs, simulate planning scenarios, and track approved relocation cases from identification to resettlement.
