@@ -827,6 +827,11 @@ export const SimplifiedMapPage: React.FC = () => {
         },
         layers: [
           {
+            id: 'map-solid-background',
+            type: 'background',
+            paint: { 'background-color': '#0F1E2E' },
+          },
+          {
             id: 'basemap-street',
             type: 'raster',
             source: 'osm_street',

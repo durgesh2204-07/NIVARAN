@@ -227,7 +227,7 @@ export const App: React.FC = () => {
           }
         >
           <Routes>
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<Navigate to="/map" replace />} />
             <Route path="/login" element={<LoginPage />} />
 
             <Route
