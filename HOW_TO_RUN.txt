@@ -1,0 +1,33 @@
+================================================================================
+NIVARAN - National Disaster Resilience & Relocation Planning Platform
+================================================================================
+
+HOW TO RUN THIS APPLICATION:
+
+Prerequisites:
+  - Node.js (version 18+ or 20+ recommended)
+  - npm (comes with Node.js)
+
+Steps:
+  1. Open a terminal (PowerShell, Command Prompt, or Bash) in this extracted directory.
+  2. Install dependencies:
+       npm install
+  3. Start the development server:
+       npm run dev
+  4. Open your browser and navigate to:
+       http://localhost:5173
+
+Other Available Commands:
+  - Run tests:
+       npm test
+  - Build for production:
+       npm run build
+  - Preview production build:
+       npm run preview
+
+Project Highlights:
+  - React 18 + Vite + TypeScript + Tailwind CSS
+  - GIS Mapping Engine (Leaflet & MapLibre GL)
+  - AI & Rule-based Disaster Preparedness & Relocation Scoring
+  - Full Offline Support & Incident Reporting
+================================================================================

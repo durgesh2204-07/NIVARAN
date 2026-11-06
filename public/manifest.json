@@ -1,0 +1,22 @@
+{
+  "name": "Nivaran — National Disaster Risk, Red Zone & Relocation Management System",
+  "short_name": "Nivaran",
+  "description": "Move people before the disaster, not after. National GIS Hazard Red Zone & Relocation Command Platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1F33",
+  "theme_color": "#0E9F8E",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B1F33'/><path d='M50 15 L80 28 V52 C80 72 50 86 50 86 C50 86 20 72 20 52 V28 Z' fill='%230E9F8E'/><circle cx='50' cy='48' r='10' fill='white'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B1F33'/><path d='M50 15 L80 28 V52 C80 72 50 86 50 86 C50 86 20 72 20 52 V28 Z' fill='%230E9F8E'/><circle cx='50' cy='48' r='10' fill='white'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

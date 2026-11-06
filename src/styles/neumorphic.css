@@ -1,0 +1,339 @@
+/* ==========================================================================
+   NIVARAN — ENTERPRISE DISASTER INTELLIGENCE DESIGN SYSTEM
+   Deep Navy (#101C2C), Slate (#172F46), Teal Green (#16A078)
+   ========================================================================== */
+
+:root,
+html.theme-light,
+html[data-theme="nivaran-light"] {
+  /* 1. NIVARAN Light (Clean Government White & Emerald Green) */
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-flat: #F1F5F9;
+  --shadow-dark: #E2E8F0;
+  --shadow-light: #FFFFFF;
+  --border: #E2E8F0;
+  --text-primary: #101C2C;
+  --text-secondary: #475569;
+  --brand-navy: #101C2C;
+  --brand-slate: #172F46;
+  --brand-teal: #008060;
+  --brand-indigo: #008060;
+  --brand-green: #008060;
+  --brand-vanilla: #FFFFFF;
+  --brand-light-green: #E6F7F2;
+
+  /* Semantic Hazard Risk Classifications */
+  --risk-safe: #16A078;
+  --risk-watch: #CA8A04;
+  --risk-alert: #EA580C;
+  --risk-danger: #DC2626;
+
+  /* Subtle Crisp Elevation */
+  --neu-raised: 0 1px 3px 0 rgba(16, 28, 44, 0.06), 0 1px 2px -1px rgba(16, 28, 44, 0.04);
+  --neu-raised-sm: 0 1px 2px 0 rgba(16, 28, 44, 0.05);
+  --neu-inset: inset 0 2px 4px 0 rgba(16, 28, 44, 0.05);
+  --neu-inset-sm: inset 0 1px 2px 0 rgba(16, 28, 44, 0.04);
+}
+
+html.dark,
+html.theme-dark,
+html[data-theme="nivaran-dark"] {
+  /* 2. NIVARAN Dark (Deep Charcoal with Green Accents) */
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface-flat: #334155;
+  --shadow-dark: #080D15;
+  --shadow-light: #1E293B;
+  --border: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --brand-navy: #0F172A;
+  --brand-slate: #1E293B;
+  --brand-teal: #10B981;
+  --brand-indigo: #10B981;
+  --brand-green: #10B981;
+  --brand-vanilla: #F8FAFC;
+  --brand-light-green: #1E293B;
+
+  --risk-safe: #10B981;
+  --risk-watch: #F59E0B;
+  --risk-alert: #F97316;
+  --risk-danger: #EF4444;
+
+  --neu-raised: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  --neu-raised-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --neu-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  --neu-inset-sm: inset 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+html.theme-midnight,
+html[data-theme="midnight"] {
+  /* 3. Midnight Command (Dark Navy with Cyan Highlights) */
+  --bg: #070D1E;
+  --surface: #0E1A33;
+  --surface-flat: #172A4E;
+  --shadow-dark: #030710;
+  --shadow-light: #16284D;
+  --border: #1E3A6D;
+  --text-primary: #FFFFFF;
+  --text-secondary: #93C5FD;
+  --brand-navy: #070D1E;
+  --brand-slate: #0E1A33;
+  --brand-teal: #00F5D4;
+  --brand-indigo: #38BDF8;
+  --brand-green: #00F5D4;
+  --brand-vanilla: #F8FAFC;
+  --brand-light-green: #172A4E;
+
+  --risk-safe: #00F5D4;
+  --risk-watch: #FBBF24;
+  --risk-alert: #FB923C;
+  --risk-danger: #F87171;
+
+  --neu-raised: 0 2px 4px 0 rgba(0, 245, 212, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --neu-raised-sm: 0 1px 2px 0 rgba(0, 245, 212, 0.05);
+  --neu-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  --neu-inset-sm: inset 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+html.theme-forest,
+html[data-theme="forest"] {
+  /* 4. Forest Operations (Deep Green with Lime Accents) */
+  --bg: #071E13;
+  --surface: #0E2E1F;
+  --surface-flat: #17422E;
+  --shadow-dark: #030F09;
+  --shadow-light: #153F2B;
+  --border: #235A3F;
+  --text-primary: #F0FDF4;
+  --text-secondary: #86EFAC;
+  --brand-navy: #071E13;
+  --brand-slate: #0E2E1F;
+  --brand-teal: #84CC16;
+  --brand-indigo: #4ADE80;
+  --brand-green: #84CC16;
+  --brand-vanilla: #F0FDF4;
+  --brand-light-green: #17422E;
+
+  --risk-safe: #84CC16;
+  --risk-watch: #EAB308;
+  --risk-alert: #F97316;
+  --risk-danger: #EF4444;
+
+  --neu-raised: 0 2px 4px 0 rgba(132, 204, 22, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --neu-raised-sm: 0 1px 2px 0 rgba(132, 204, 22, 0.05);
+  --neu-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  --neu-inset-sm: inset 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+html.high-contrast,
+html.theme-high-contrast,
+html[data-theme="high-contrast"] {
+  /* 5. High Contrast (Accessibility Focused) */
+  --bg: #000000;
+  --surface: #000000;
+  --surface-flat: #121212;
+  --shadow-dark: transparent;
+  --shadow-light: transparent;
+  --border: #FACC15;
+  --text-primary: #FFFFFF;
+  --text-secondary: #FACC15;
+  --brand-navy: #000000;
+  --brand-slate: #121212;
+  --brand-teal: #FACC15;
+  --brand-indigo: #FACC15;
+  --brand-green: #FACC15;
+  --brand-vanilla: #000000;
+  --brand-light-green: #121212;
+
+  --risk-safe: #22C55E;
+  --risk-watch: #FACC15;
+  --risk-alert: #FB923C;
+  --risk-danger: #FF0000;
+}
+
+/* Text Size Controls (100% / 115% / 130%) */
+html[data-text-size="100"] {
+  font-size: 15px;
+}
+html[data-text-size="115"] {
+  font-size: 17.25px;
+}
+html[data-text-size="130"] {
+  font-size: 19.5px;
+}
+
+/* Mobile: Reduce shadow blur by half for performance */
+@media (max-width: 768px) {
+  :root,
+  html.dark {
+    --neu-raised: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    --neu-raised-sm: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+    --neu-inset: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+  }
+}
+
+/* High-Contrast Mode: Replaces soft shadows with 2px solid borders */
+html.high-contrast,
+html.high-contrast.dark {
+  --neu-raised: none;
+  --neu-raised-sm: none;
+  --neu-inset: none;
+  --neu-inset-sm: none;
+}
+
+html.high-contrast .neu-raised,
+html.high-contrast .neu-card,
+html.high-contrast .neu-raised-sm,
+html.high-contrast .neu-btn,
+html.high-contrast .neu-inset,
+html.high-contrast .neu-input {
+  box-shadow: none !important;
+  border: 2px solid var(--text-primary) !important;
+}
+
+/* Core Neumorphic Classes */
+.neu-shell {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+.neu-raised,
+.neu-card {
+  background-color: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--neu-raised);
+  border: 1px solid var(--border);
+}
+
+.neu-raised-sm,
+.neu-btn {
+  background-color: var(--surface);
+  border-radius: 10px;
+  box-shadow: var(--neu-raised-sm);
+  border: 1px solid var(--border);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms ease,
+              border-color 160ms ease,
+              color 160ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.neu-btn:hover {
+  border-color: var(--brand-teal);
+  transform: translateY(-1.5px);
+  box-shadow: 0 3px 8px -1px rgba(16, 28, 44, 0.08);
+}
+
+.neu-btn-primary {
+  background-color: var(--brand-teal);
+  color: #FFFFFF !important;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px 0 rgba(22, 160, 120, 0.25);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 160ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.neu-btn-primary:hover {
+  background-color: #128865;
+  box-shadow: 0 4px 10px -1px rgba(22, 160, 120, 0.4);
+  transform: translateY(-1.5px);
+}
+
+.neu-btn:active,
+.neu-btn[aria-pressed="true"],
+.neu-btn-active {
+  box-shadow: var(--neu-inset) !important;
+  transform: scale(0.97) translateY(0) !important;
+}
+
+.neu-btn-primary:active {
+  transform: scale(0.97) translateY(0) !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.neu-btn:disabled,
+.neu-btn-primary:disabled,
+.neu-btn[aria-disabled="true"],
+.neu-btn-primary[aria-disabled="true"] {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.neu-inset,
+.neu-input {
+  background-color: var(--surface);
+  border-radius: 10px;
+  box-shadow: var(--neu-inset);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+/* Dense Data Flat Panel (tables, map popups, forms with many rows, legends) */
+.neu-flat,
+.neu-data-panel {
+  background-color: var(--surface-flat);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Toggle Pill */
+.neu-pill {
+  border-radius: 999px;
+}
+
+/* Visible 2px Teal Focus Ring with 2px Offset */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #16A078 !important;
+  outline-offset: 2px !important;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Alert Ticker Marquee (Pausable) */
+@keyframes nivaran-ticker {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: nivaran-ticker 42s linear infinite;
+}
+
+.ticker-track.paused,
+.ticker-track:hover,
+.ticker-track:focus-within {
+  animation-play-state: paused;
+}
