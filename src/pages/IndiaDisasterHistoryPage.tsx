@@ -321,6 +321,12 @@ export const IndiaDisasterHistoryPage: React.FC = () => {
         .catch(() => {});
     });
 
+    map.on('error', (e: any) => {
+      if (e?.error?.status !== 404) {
+        console.warn('IndiaDisasterHistory map event:', e?.error?.message || e);
+      }
+    });
+
     mapRef.current = map;
 
     return () => {

@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/index.html"
+  status = 404
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(self), camera=(self), microphone=(self), payment=(), usb=()"
+    Content-Security-Policy = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: http: https: https://*.tile.openstreetmap.org https://server.arcgisonline.com https://services.arcgisonline.com https://*.basemaps.cartocdn.com https://s3.amazonaws.com https://*.tile.opentopomap.org https://tiles.openfreemap.org https://*.google.com https://images.unsplash.com; connect-src 'self' ws: wss: http: https: blob: data: https://*.tile.openstreetmap.org https://server.arcgisonline.com https://services.arcgisonline.com https://*.basemaps.cartocdn.com https://s3.amazonaws.com https://api.open-meteo.com https://earthquake.usgs.gov https://nominatim.openstreetmap.org https://router.project-osrm.org https://tiles.openfreemap.org; worker-src 'self' blob:; child-src 'self' blob:; font-src 'self' data: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"

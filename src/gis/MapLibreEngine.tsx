@@ -1457,6 +1457,13 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
       setBearingDeg(Math.round(map.getBearing()));
     });
 
+    map.on('error', (e: any) => {
+      // Non-fatal event listener: absorbs network/tile errors without throwing unhandled exceptions
+      if (e?.error?.status !== 404) {
+        console.warn('MapLibre main map event:', e?.error?.message || e);
+      }
+    });
+
     mapRef.current = map;
 
     return () => {
@@ -1650,6 +1657,12 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
         pitch: 62,
         duration: 850,
       });
+    });
+
+    googleMap.on('error', (e: any) => {
+      if (e?.error?.status !== 404) {
+        console.warn('MapLibre secondary map event:', e?.error?.message || e);
+      }
     });
 
     googleSecondaryMapRef.current = googleMap;

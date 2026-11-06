@@ -508,6 +508,12 @@ export const SimplifiedAlertsPage: React.FC = () => {
         });
       });
 
+      map.on('error', (e: any) => {
+        if (e?.error?.status !== 404) {
+          console.warn('SimplifiedAlerts mini-map event:', e?.error?.message || e);
+        }
+      });
+
       miniMapRef.current = map;
     }
 

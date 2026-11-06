@@ -1214,6 +1214,12 @@ export const SimplifiedMapPage: React.FC = () => {
       });
     });
 
+    map.on('error', (e: any) => {
+      if (e?.error?.status !== 404) {
+        console.warn('SimplifiedMap map event:', e?.error?.message || e);
+      }
+    });
+
     mapRef.current = map;
     return () => {
       map.remove();
