@@ -305,7 +305,7 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* 6. RELOCATION PRIORITY ENGINE (PS 26191) */}
+              {/* 6. RELOCATION PRIORITY ENGINE */}
               <Route
                 path="/priority-ranking"
                 element={

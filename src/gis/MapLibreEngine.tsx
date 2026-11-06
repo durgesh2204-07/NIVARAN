@@ -460,13 +460,13 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
         } catch {
           // ignore
         }
-        // Default accurate Pune / Pimpri-Chinchwad PCCOE coordinates if offline
+        // Default accurate Pune Regional Command Center coordinates if offline
         lockCoordinates(
-          18.6517,
-          73.7615,
+          18.5204,
+          73.8567,
           10,
-          'Live GPS (Nigdi / Pimpri-Chinchwad, Pune)',
-          'Sector 26, Pradhikaran, Nigdi, Pimpri-Chinchwad, Pune'
+          'Live GPS (District Emergency Operations Center, Pune)',
+          'District Emergency Operations Centre, Shivajinagar, Pune'
         );
       };
 
@@ -2374,10 +2374,10 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
     setGpsSimActive(true);
     const waypoints: { lat: number; lng: number; label: string; addr: string }[] = [
       {
-        lat: 18.6517,
-        lng: 73.7615,
-        label: 'Patrol: Nigdi / PCCOE Green Zone',
-        addr: 'Sector 26, Pradhikaran, Nigdi, Pune',
+        lat: 18.5204,
+        lng: 73.8567,
+        label: 'Patrol: Pune Regional Command Hub',
+        addr: 'District Emergency Operations Center, Shivajinagar, Pune',
       },
       {
         lat: 18.9265,
@@ -2460,13 +2460,13 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
       acquireAccurateLiveGps(true);
       return;
     }
-    if (val === 'PUNE_PCCOE') {
+    if (val === 'PUNE_HQ') {
       applyLiveLocationAndDetectZone(
-        18.6517,
-        73.7615,
+        18.5204,
+        73.8567,
         5,
-        'PCCOE / Nigdi Pradhikaran, Pune',
-        'Sector 26, Pradhikaran, Nigdi, Pimpri-Chinchwad, Pune'
+        'Pune District Emergency Operations Center',
+        'District Emergency Operations Centre, Shivajinagar, Pune'
       );
       return;
     }
@@ -2593,7 +2593,7 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
               type="text"
               value={addressQuery}
               onChange={(e) => setAddressQuery(e.target.value)}
-              placeholder="Search street, college, city (e.g. PCCOE Pune)..."
+              placeholder="Search village, city, district (e.g. Mahad, Irshalwadi, Pune)..."
               className="bg-slate-900 text-white border border-slate-700 rounded-[8px] pl-8 pr-2.5 py-1.5 text-xs w-56 sm:w-64 focus:outline-none focus:border-[#0B8F80]"
             />
           </div>
@@ -2679,17 +2679,17 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
             type="button"
             onClick={() =>
               applyLiveLocationAndDetectZone(
-                18.6517,
-                73.7615,
+                18.5204,
+                73.8567,
                 5,
-                'PCCOE / Nigdi, Pune',
-                'Sector 26, Pradhikaran, Nigdi, Pimpri-Chinchwad, Pune'
+                'Pune District Emergency Operations Center (DEOC)',
+                'Collector Office, Shivajinagar, Pune'
               )
             }
             className="px-2.5 py-1.5 rounded-[8px] bg-slate-900/80 hover:bg-slate-900 text-white font-bold border border-white/30"
-            title="Center on PCCOE / Nigdi, Pimpri-Chinchwad, Pune"
+            title="Center on Pune District Emergency Command Center"
           >
-            📍 Pune / PCCOE
+            📍 Pune DEOC
           </button>
 
           <button
@@ -2810,8 +2810,8 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
               📍 Lock My Accurate Device GPS ({userPos.lat.toFixed(4)}°N,{' '}
               {userPos.lng.toFixed(4)}°E)
             </option>
-            <option value="PUNE_PCCOE">
-              📍 PCCOE / Nigdi Pradhikaran, Pune (18.6517°N, 73.7615°E)
+            <option value="PUNE_HQ">
+              📍 Pune Emergency Operations Center (18.5204°N, 73.8567°E)
             </option>
             <option value="FIT_ALL">
               🗺️ Fit All {villages.length + sites.length + reliefCamps.length} Locations on Map

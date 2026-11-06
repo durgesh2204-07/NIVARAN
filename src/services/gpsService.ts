@@ -63,7 +63,7 @@ let bestReadingInWindow: RawReading | null = null;
 
 // Local fallback place directory for immediate <1ms resolution
 const LOCAL_KNOWN_PLACES: Array<{ name: string; district: string; lat: number; lng: number }> = [
-  { name: 'PCCOE (Pimpri Chinchwad College Of Engineering), Sector 26, Nigdi', district: 'Pune', lat: 18.6517, lng: 73.7615 },
+  { name: 'Pune District Emergency Operations Centre (DEOC), Collector Office', district: 'Pune', lat: 18.5204, lng: 73.8567 },
   { name: 'Akurdi Railway Station & Pradhikaran Hub', district: 'Pune', lat: 18.6478, lng: 73.7712 },
   { name: 'Pimpri-Chinchwad Municipal Hub', district: 'Pune', lat: 18.6298, lng: 73.7997 },
   { name: 'Pune City (Shivajinagar / Swargate)', district: 'Pune', lat: 18.5204, lng: 73.8567 },
@@ -167,12 +167,12 @@ let currentGpsState: AccurateGpsState = {
   honestHardwareNote: HONEST_HARDWARE_NOTE,
   updatedAtIst: nowIstString(),
   addressInWords:
-    'PCCOE Campus, Sector 26, Pradhikaran, Nigdi, Pune, Maharashtra 411044, India',
-  shortAddressInWords: 'PCCOE Campus, Nigdi, Pune',
-  locality: 'Nigdi',
+    'District Emergency Operations Centre (DEOC), Collector Office, Pune, Maharashtra 411001, India',
+  shortAddressInWords: 'Pune District Emergency Operations Center',
+  locality: 'Shivajinagar',
   district: 'Pune',
   state: 'Maharashtra',
-  postcode: '411044',
+  postcode: '411001',
   isResolvingAddress: false,
 };
 

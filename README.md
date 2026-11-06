@@ -1,6 +1,6 @@
 # NIVARAN GIS 2.0 — Disaster Resilience & Relocation Planning Platform
 
-> **Problem Statement 26191** | **Theme:** *Intelligent Identification of Hazard-Based Red Zones, Carrying Capacity Assessment, and Immediate Relocation Needs for Vulnerable Habitations*  
+> **NIVARAN National Platform** | **Theme:** *Intelligent Identification of Hazard-Based Red Zones, Carrying Capacity Assessment, and Immediate Relocation Needs for Vulnerable Habitations*  
 > **Authority Context:** National Disaster Management Authority (NDMA) & State Disaster Management Authority (SDMA) Maharashtra, India  
 > **Piloted Geography:** 25 disaster-monitored habitations and 8 rehabilitation townships across the Western Ghats (Raigad, Satara, Pune, Ratnagiri, Kolhapur, Sindhudurg).
 
@@ -46,7 +46,7 @@ The application shell provides a persistent 3-panel GIS command center and a col
 | **03** | **Hazard Intelligence** | `/hazard-map` | Slope instability, landslide hazard zonation (LHZ), rainfall radar overlays, and satellite change-detection review. |
 | **04** | **Red Zone Analysis** | `/dashboard` | Multi-hazard vulnerability analytics, high-risk habitation matrix, and 4-tier risk zone classification. |
 | **05** | **Vulnerability Assessment** | `/vulnerability` | Demographic exposure (% elderly, % disabled, % BPL, kutcha houses), healthcare distance, and 2×2 policy matrix. |
-| **06** | **Relocation Priority** | `/priority-ranking` | PS 26191 multi-criteria ranking algorithm, urgency scoring, official relocation order PDF generation, and CSV exports. |
+| **06** | **Relocation Priority** | `/priority-ranking` | Multi-criteria ranking algorithm, urgency scoring, official relocation order PDF generation, and CSV exports. |
 | **07** | **Safe-Zone Capacity** | `/relocation-sites` | MCDA candidate site evaluation, restrictive carrying capacity formula, and Digital Dress Rehearsal (+20 yr climate stress). |
 | **08** | **Relocation Site Planner** | `/planning` | Automated housing layout generator, plot allotment grid, and essential infrastructure block planning. |
 | **09** | **Digital Twin** | `/digital-twin` | High-resolution 3D elevation terrain, camera pitch/bearing controls, and flood inundation dynamic mesh. |
@@ -81,7 +81,7 @@ $$\text{Remaining Capacity} = \max\left(0,\ \text{Safe Capacity} - \text{Existin
 - **Safety Rule:** Usable land area alone never guarantees capacity; water supply and sanitation constraints govern the operational limit to prevent overcrowding and secondary disasters.
 - **Digital Dress Rehearsal:** Evaluates candidate sites under $+20\text{ yr}$ climate rainfall stress to guarantee families are never relocated into a nascent hazard zone.
 
-### 3. PS 26191 Priority Ranking & Greedy Matching
+### 3. Multi-Criteria Priority Ranking & Greedy Matching
 $$\text{Priority Score} = \text{Hazard Score} \times \text{Vulnerability Score} \times \left(1 + \frac{\text{Verified Reports Count}}{10}\right)$$
 - Habitants are greedily assigned to candidate relocation sites by distance, suitability score, and available capacity. If a primary site fills up, allocations spill over to the next closest safe site without overbooking.
 
@@ -112,7 +112,7 @@ $$\text{Priority Score} = \text{Hazard Score} \times \text{Vulnerability Score} 
 ### Installation & Execution
 ```bash
 # 1. Clone repository & navigate to project directory
-cd pccoe
+cd NIVARAN
 
 # 2. Install dependencies
 npm install

@@ -370,14 +370,14 @@ const ZONE_LOCATION_WORDS_MAP: Record<
     hazardSummaryMr: 'घोड नदी पाणलोट क्षेत्रात मध्यम-मुसळधार पाऊस देखरेख (७४ मिमी पाऊस)',
   },
   'az-07': {
-    wordsEn: 'PCCOE Campus, Sector 26, Pradhikaran, Nigdi, Pimpri-Chinchwad, Pune, Maharashtra 411044, India',
-    wordsHi: 'पीसीसई कैम्पस, सेक्टर 26, प्राधिकरण, निगडी, पिंपरी-चिंचवड़, पुणे, महाराष्ट्र 411044, भारत',
-    wordsMr: 'पीसीसई परिसर, सेक्टर २६, प्राधिकरण, निगडी, पिंपरी-चिंचवड, पुणे, महाराष्ट्र ४११०४४, भारत',
-    taluka: 'Haveli / Pimpri-Chinchwad',
+    wordsEn: 'Pune District Emergency Operations Center (DEOC), Collector Office, Pune, Maharashtra 411001, India',
+    wordsHi: 'पुणे जिला आपदा नियंत्रण केंद्र (DEOC), कलेक्ट्रेट, पुणे, महाराष्ट्र 411001, भारत',
+    wordsMr: 'पुणे जिल्हा आपत्कालीन नियंत्रण केंद्र (DEOC), जिल्हाधिकारी कार्यालय, पुणे, महाराष्ट्र ४११००१, भारत',
+    taluka: 'Shivajinagar / Haveli',
     district: 'Pune',
-    hazardSummaryEn: 'Safe Urban Zone; Normal Operations & Active Relief Base (<18 mm rainfall)',
-    hazardSummaryHi: 'सुरक्षित शहरी क्षेत्र; सामान्य संचालन और सक्रिय राहत शिविर (<18 मिमी वर्षा)',
-    hazardSummaryMr: 'सुरक्षित नागरी क्षेत्र; सामान्य कामकाज व सक्रिय मदत केंद्र (<१८ मिमी पाऊस)',
+    hazardSummaryEn: 'District Emergency Operations Center & State Relief Logistics Command Hub (<18 mm rainfall)',
+    hazardSummaryHi: 'जिला आपदा परिचालन केंद्र एवं राज्य राहत कमान केंद्र (<18 मिमी वर्षा)',
+    hazardSummaryMr: 'जिल्हा आपत्कालीन नियंत्रण केंद्र व राज्य मदत रसद कमान (<१८ मिमी पाऊस)',
   },
   'az-08': {
     wordsEn: 'Panchganga Basin Monitor Zone, Karveer & Shirol Taluka, Kolhapur District, Maharashtra, India',
@@ -469,7 +469,7 @@ export const SimplifiedMapPage: React.FC = () => {
   const [showShelters, setShowShelters] = useState(true);
   const [showIncidents, setShowIncidents] = useState(true);
   const [showMyLocation, setShowMyLocation] = useState(true);
-  const [showHabitations, setShowHabitations] = useState(false);
+  const [showHabitations, setShowHabitations] = useState(true);
   const [villageSearchTerm, setVillageSearchTerm] = useState('');
   const [villageDirectoryOpen, setVillageDirectoryOpen] = useState(true);
   const [showVillageHazardBuffers, setShowVillageHazardBuffers] = useState(true);
@@ -540,6 +540,7 @@ export const SimplifiedMapPage: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<ActiveAlertZone | null>(null);
   const zonePopupRef = useRef<maplibregl.Popup | null>(null);
   const zoneHighlightMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const villagePopupRef = useRef<maplibregl.Popup | null>(null);
   const detectAndFocusZoneRef = useRef<((zone: ActiveAlertZone) => void) | null>(null);
   const [selectedShelter, setSelectedShelter] = useState<ReliefCamp | null>(null);
   const [selectedVolunteer, setSelectedVolunteer] = useState<VolunteerMember | null>(null);
@@ -1554,13 +1555,13 @@ export const SimplifiedMapPage: React.FC = () => {
 
   // Continuous Live GPS Auto-centering (Follow Me) when tracking is active
   useEffect(() => {
-    if (!isLiveTracking || !mapRef.current || gps.isManualPin) return;
+    if (!isLiveTracking || !mapRef.current || gps.isManualPin || selectedVillage) return;
     mapRef.current.easeTo({
       center: [gps.lng, gps.lat],
       duration: 650,
       essential: true,
     });
-  }, [gps.lat, gps.lng, isLiveTracking, gps.isManualPin]);
+  }, [gps.lat, gps.lng, isLiveTracking, gps.isManualPin, selectedVillage]);
 
   // Sync OSRM Shelter Directions Route Line
   useEffect(() => {
@@ -2566,7 +2567,31 @@ export const SimplifiedMapPage: React.FC = () => {
     });
   }, [villages, weights, alertFilterLevel, villageSearchTerm]);
 
+  const handleReturnToLiveLocation = () => {
+    setSelectedVillage(null);
+    if (villagePopupRef.current) {
+      villagePopupRef.current.remove();
+      villagePopupRef.current = null;
+    }
+    setIsLiveTracking(true);
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [gps.lng, gps.lat],
+        zoom: 16.0,
+        duration: 750,
+        essential: true,
+      });
+    }
+    useAppStore.getState().showSingleToast({
+      title: '🎯 Live GPS Restored',
+      message: 'Map is now tracking your live device GPS location.',
+      type: 'info',
+    });
+  };
+
   const handleSelectVillageFromList = (v: Village) => {
+    // 1. Lock map to village and freeze background GPS auto-centering
+    setIsLiveTracking(false);
     setSelectedZone(null);
     clearZoneHighlightAndPopup();
     setSelectedShelter(null);
@@ -2576,6 +2601,7 @@ export const SimplifiedMapPage: React.FC = () => {
 
     const meta = getVillageZoneMeta(v);
 
+    // 2. Smoothly fly and anchor on village coordinates
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: [v.lng, v.lat],
@@ -2584,6 +2610,72 @@ export const SimplifiedMapPage: React.FC = () => {
         curve: 1.2,
         essential: true,
       });
+
+      // 3. Clear existing popup & mount prominent on-map popup card
+      if (villagePopupRef.current) {
+        villagePopupRef.current.remove();
+        villagePopupRef.current = null;
+      }
+
+      const popupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 6px; min-width: 220px; max-width: 280px; color: #0F172A;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
+            <span style="font-weight: 800; font-size: 13px; color: ${meta.colorHex};">📍 ${v.name}</span>
+            <span style="background: ${meta.colorHex}; color: #FFFFFF; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 9999px;">${meta.zoneName}</span>
+          </div>
+          ${v.nameMr ? `<div style="font-size: 11px; color: #475569; font-weight: 600; margin-bottom: 4px;">स्थानिक: ${v.nameMr}</div>` : ''}
+          <div style="font-size: 10.5px; color: #64748B; margin-bottom: 6px;">${v.taluka} Taluka · ${v.district} District</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 6px; padding: 5px; margin-bottom: 6px; font-size: 10.5px;">
+            <div><strong>Risk Score:</strong> <span style="color: ${meta.colorHex}; font-weight: 700;">${meta.score100}/100</span></div>
+            <div><strong>Elevation:</strong> ${v.elevationM}m</div>
+            <div><strong>Slope:</strong> ${v.slopeDeg}°</div>
+            <div><strong>Families:</strong> ${v.households} HH</div>
+          </div>
+          <div style="font-size: 9.5px; background: #FEF3C7; color: #92400E; padding: 3px 6px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+            <span>🔒</span><span>Pin Locked (Stays until Live GPS clicked)</span>
+          </div>
+          <div style="display: flex; gap: 4px;">
+            <button id="btn-village-shelter-dir" style="flex: 1; background: #008060; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 5px 6px; border-radius: 5px; border: none; cursor: pointer;">
+              ⛺ Shelter Route
+            </button>
+            <button id="btn-village-live-return" style="flex: 1; background: #0B1F33; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 5px 6px; border-radius: 5px; border: none; cursor: pointer;">
+              🎯 Live GPS
+            </button>
+          </div>
+        </div>
+      `;
+
+      const popup = new maplibregl.Popup({
+        offset: 24,
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: '300px',
+      })
+        .setLngLat([v.lng, v.lat])
+        .setHTML(popupHtml)
+        .addTo(mapRef.current);
+
+      popup.on('close', () => {
+        setSelectedVillage(null);
+        villagePopupRef.current = null;
+      });
+
+      setTimeout(() => {
+        const shelterBtn = document.getElementById('btn-village-shelter-dir');
+        if (shelterBtn) {
+          shelterBtn.onclick = () => {
+            void handleGetDirectionsToCoords(`${v.name} (${v.district})`, v.lat, v.lng);
+          };
+        }
+        const liveGpsBtn = document.getElementById('btn-village-live-return');
+        if (liveGpsBtn) {
+          liveGpsBtn.onclick = () => {
+            handleReturnToLiveLocation();
+          };
+        }
+      }, 50);
+
+      villagePopupRef.current = popup;
     }
 
     // Open detailed contextual SlidePanel with village & zone breakdown
@@ -2598,7 +2690,7 @@ export const SimplifiedMapPage: React.FC = () => {
 
     useAppStore.getState().showSingleToast({
       title: `📍 ${v.name} (${v.taluka}, ${v.district})`,
-      message: `${meta.zoneName} · Risk Score: ${meta.score100}/100`,
+      message: `${meta.zoneName} · Risk Score: ${meta.score100}/100. Pin locked on map until Live GPS is clicked.`,
       type: 'info',
     });
   };
@@ -2876,7 +2968,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 <span className="text-xs sm:text-sm font-extrabold text-[#0F291E] dark:text-emerald-100 flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-[#059669] shrink-0" strokeWidth={2.2} />
                   <span className="break-words">
-                    {gps.addressInWords || gps.shortAddressInWords || 'PCCOE Campus, Sector 26, Pradhikaran, Nigdi, Pune, Maharashtra 411044'}
+                    {gps.addressInWords || gps.shortAddressInWords || 'District Emergency Operations Centre (DEOC), Collector Office, Pune, Maharashtra 411001'}
                   </span>
                 </span>
                 <span
@@ -2943,30 +3035,20 @@ export const SimplifiedMapPage: React.FC = () => {
             {/* Live GPS Tracking (Follow Me) Mode Toggle */}
             <button
               type="button"
-              onClick={() => {
-                const nextState = !isLiveTracking;
-                setIsLiveTracking(nextState);
-                if (nextState && mapRef.current) {
-                  mapRef.current.flyTo({
-                    center: [gps.lng, gps.lat],
-                    zoom: 16.0,
-                    duration: 700,
-                  });
-                }
-              }}
-              className={`px-3 py-2 text-xs font-bold rounded-[10px] border flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 ${isLiveTracking
+              onClick={handleReturnToLiveLocation}
+              className={`px-3 py-2 text-xs font-bold rounded-[10px] border flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 ${isLiveTracking && !selectedVillage
                   ? 'bg-[#E8F5E9] border-[#A7F3D0] text-[#059669] hover:bg-[#D1FAE5]'
                   : 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100'
                 }`}
               title={
-                isLiveTracking
+                isLiveTracking && !selectedVillage
                   ? 'Continuous GPS auto-follow is active. Click to unlock map panning.'
-                  : 'Continuous GPS auto-follow is paused. Click to re-center on your position.'
+                  : 'Click to center map on your live GPS position and release village lock.'
               }
             >
-              <span className={`w-2.5 h-2.5 rounded-full ${isLiveTracking ? 'bg-[#059669] animate-ping' : 'bg-amber-500'}`} />
+              <span className={`w-2.5 h-2.5 rounded-full ${isLiveTracking && !selectedVillage ? 'bg-[#059669] animate-ping' : 'bg-amber-500'}`} />
               <span>
-                {isLiveTracking
+                {isLiveTracking && !selectedVillage
                   ? (language === 'hi' ? '🟢 लाइव ट्रैकिंग: सक्रिय' : language === 'mr' ? '🟢 थेट ट्रॅकिंग: सुरू' : '🟢 Live Tracking: ON')
                   : (language === 'hi' ? '🎯 पुनः ट्रैक करें' : language === 'mr' ? '🎯 पुन्हा ट्रॅक करा' : '🎯 Follow Live GPS')}
               </span>
@@ -4548,7 +4630,7 @@ export const SimplifiedMapPage: React.FC = () => {
       </div>
 
       {/* =====================================================================
-          PROBLEM STATEMENT 26191 — INTEGRATED GIS COMMAND DECISION DECK
+          NATIONAL DISASTER RESILIENCE PLATFORM — INTEGRATED GIS COMMAND DECISION DECK
           (Hierarchical Geographic Selector · Categorized Layer Provenance ·
            Explainable Red Zone Classification · Restrictive Carrying Capacity ·
            MCDA Safe-Site Matching & Relocation Priority)
@@ -4794,9 +4876,15 @@ export const SimplifiedMapPage: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedVillage(null)}
+                    onClick={() => {
+                      setSelectedVillage(null);
+                      if (villagePopupRef.current) {
+                        villagePopupRef.current.remove();
+                        villagePopupRef.current = null;
+                      }
+                    }}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    title="Close details"
+                    title="Close details and release pin lock"
                   >
                     <X className="w-4 h-4" strokeWidth={2} />
                   </button>
@@ -4868,6 +4956,15 @@ export const SimplifiedMapPage: React.FC = () => {
                         <span>Route to Nearest Shelter ({nearestShelter.name})</span>
                       </button>
                     )}
+
+                    <button
+                      type="button"
+                      onClick={handleReturnToLiveLocation}
+                      className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <Crosshair className="w-3.5 h-3.5 text-[#14B8A6]" strokeWidth={2} />
+                      <span>Return to Live GPS</span>
+                    </button>
                   </div>
 
                   <button

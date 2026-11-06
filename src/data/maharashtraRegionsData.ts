@@ -55,7 +55,7 @@ export const MAHARASHTRA_DISTRICTS_DATA: MaharashtraDistrict[] = [
         lng: 73.7997,
         villages: [
           { name: 'Akurdi / Nigdi', nameMr: 'आकुर्डी / निगडी', lat: 18.6517, lng: 73.7615, hazardLevel: 'Green', hazardType: 'Safe Urban Base' },
-          { name: 'PCCOE Campus Pradhikaran', nameMr: 'पीसीसीओई परिसर', lat: 18.6517, lng: 73.7615, hazardLevel: 'Green', hazardType: 'Relief Logistics Hub' },
+          { name: 'Pune District Emergency Operations Center (DEOC)', nameMr: 'पुणे जिल्हा आपत्कालीन नियंत्रण केंद्र', lat: 18.5204, lng: 73.8567, hazardLevel: 'Green', hazardType: 'District Emergency Command Hub' },
           { name: 'Chinchwad Station', nameMr: 'चिंचवड स्टेशन', lat: 18.6346, lng: 73.7895, hazardLevel: 'Green' },
           { name: 'Bhosari MIDC', nameMr: 'भोसरी', lat: 18.6247, lng: 73.8478, hazardLevel: 'Green' },
           { name: 'Khadakwasla Dam Basin', nameMr: 'खडकवासला', lat: 18.4312, lng: 73.7632, hazardLevel: 'Yellow', hazardType: 'Reservoir Buffer' },
