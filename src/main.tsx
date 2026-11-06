@@ -46,7 +46,9 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     }
   } else {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      const base = (import.meta as any).env?.BASE_URL || '/';
+      const swUrl = base.endsWith('/') ? `${base}sw.js` : `${base}/sw.js`;
+      navigator.serviceWorker.register(swUrl).catch(() => {});
     });
   }
 }

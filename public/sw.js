@@ -1,10 +1,19 @@
-const CACHE_NAME = 'nivaran-command-cache-v4';
-const TILE_CACHE_NAME = 'nivaran-map-tiles-v4';
-const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE_NAME = 'nivaran-command-cache-v5';
+const TILE_CACHE_NAME = 'nivaran-map-tiles-v5';
 
 self.addEventListener('install', (event) => {
+  const scope = self.registration.scope;
+  const staticAssets = [scope, `${scope}index.html`];
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(
+        staticAssets.map((url) =>
+          fetch(url, { cache: 'no-cache' }).then((res) => {
+            if (res.ok) return cache.put(url, res);
+          })
+        )
+      )
+    )
   );
   self.skipWaiting();
 });
@@ -36,23 +45,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 1. SPA Navigation Requests -> Network first, fallback to cached /index.html
+  // 1. SPA Navigation Requests -> Network first, fallback to cached index.html
   if (event.request.mode === 'navigate') {
+    const scope = self.registration.scope;
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+              cache.put(`${scope}index.html`, response.clone());
+            });
+          }
           return response;
         })
         .catch(() =>
-          caches.match('/index.html').then((cached) => cached || caches.match('/'))
+          caches.match(event.request).then((cached) =>
+            cached || caches.match(`${scope}index.html`) || caches.match(scope)
+          )
         )
     );
     return;
   }
 
-  // 2. Map Tiles & Elevation Tiles -> Cache first, then network, fallback to empty 200 if offline
+  // 2. Map & Elevation Raster Tiles -> Cache first, then network; on failure return 404 (prevents invalid image decode errors)
   if (
     url.hostname.includes('arcgisonline.com') ||
     url.hostname.includes('openstreetmap.org') ||
@@ -74,16 +91,14 @@ self.addEventListener('fetch', (event) => {
               }
               return networkResp;
             })
-            .catch(
-              () => new Response('', { status: 200, statusText: 'Offline Tile Fallback' })
-            );
+            .catch(() => new Response(null, { status: 404, statusText: 'Tile Not Found' }));
         })
       )
     );
     return;
   }
 
-  // 3. Network first, fallback to cache when offline
+  // 3. Static Assets & Scripts -> Network first, fallback to cache
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
