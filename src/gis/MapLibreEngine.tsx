@@ -53,6 +53,7 @@ import {
   getSatelliteBasemapConfig,
   getTopoBasemapConfig,
   getDarkBasemapConfig,
+  getStoredMapProvider,
 } from './mapTileConfig';
 import {
   buildVillageExplainPayload,
@@ -130,19 +131,37 @@ export const RIVER_PATHS: { name: string; coords: [number, number][] }[] = [
 ];
 
 // Resilient Multi-Provider GIS Basemaps with API key support & automatic zero-key fallback
+export function getBasemapRasterConfig(style: BasemapStyle): {
+  tiles: string[];
+  attribution: string;
+  label: string;
+} {
+  const provider = getStoredMapProvider();
+  switch (style) {
+    case 'osm':
+      return getStreetBasemapConfig(provider);
+    case 'satellite':
+      return {
+        tiles: getSatelliteBasemapConfig().imageryTiles,
+        attribution: getSatelliteBasemapConfig().attribution,
+        label: '3D Satellite + Streets',
+      };
+    case 'terrain':
+      return getTopoBasemapConfig(provider);
+    case 'dark':
+    default:
+      return getDarkBasemapConfig(provider);
+  }
+}
+
 const BASEMAP_RASTER_URLS: Record<
   BasemapStyle,
   { tiles: string[]; attribution: string; label: string }
-> = {
-  osm: getStreetBasemapConfig(),
-  satellite: {
-    tiles: getSatelliteBasemapConfig().imageryTiles,
-    attribution: getSatelliteBasemapConfig().attribution,
-    label: '3D Satellite + Streets',
+> = new Proxy({} as Record<BasemapStyle, { tiles: string[]; attribution: string; label: string }>, {
+  get: (_target, prop: string) => {
+    return getBasemapRasterConfig(prop as BasemapStyle);
   },
-  terrain: getTopoBasemapConfig(),
-  dark: getDarkBasemapConfig(),
-};
+});
 
 export type ZoneCategory = 'RED' | 'ORANGE' | 'GREEN';
 

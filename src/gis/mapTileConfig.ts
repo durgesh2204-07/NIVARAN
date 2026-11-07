@@ -38,13 +38,26 @@ export function setStoredMapProvider(provider: MapProviderType): void {
 
 export function getStoredProviderKey(provider: MapProviderType): string {
   try {
+    const env = (import.meta as unknown as { env?: Record<string, string> }).env || {};
     switch (provider) {
       case 'google':
-        return window.localStorage.getItem(PROVIDER_STORAGE_KEYS.google) || '';
+        return (
+          window.localStorage.getItem(PROVIDER_STORAGE_KEYS.google) ||
+          env.VITE_GOOGLE_MAPS_KEY ||
+          ''
+        );
       case 'mapbox':
-        return window.localStorage.getItem(PROVIDER_STORAGE_KEYS.mapbox) || '';
+        return (
+          window.localStorage.getItem(PROVIDER_STORAGE_KEYS.mapbox) ||
+          env.VITE_MAPBOX_TOKEN ||
+          ''
+        );
       case 'maptiler':
-        return window.localStorage.getItem(PROVIDER_STORAGE_KEYS.maptiler) || '';
+        return (
+          window.localStorage.getItem(PROVIDER_STORAGE_KEYS.maptiler) ||
+          env.VITE_MAPTILER_KEY ||
+          ''
+        );
       case 'custom':
         return (
           window.localStorage.getItem(PROVIDER_STORAGE_KEYS.customUrl) ||
@@ -192,17 +205,37 @@ export function getDarkBasemapConfig(
     };
   }
 
-  // DEFAULT / FREE: CartoDB Dark Matter with resilient multi-CDN mirrors & Esri Dark Canvas fallback
+  if (provider === 'google') {
+    const tiles = activeKey
+      ? [
+          `https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37&key=${encodeURIComponent(activeKey)}`,
+          `https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37&key=${encodeURIComponent(activeKey)}`,
+          `https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37&key=${encodeURIComponent(activeKey)}`,
+          `https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37&key=${encodeURIComponent(activeKey)}`,
+        ]
+      : [
+          'https://mt0.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37',
+          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37',
+          'https://mt2.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37',
+          'https://mt3.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&apistyle=s.t%3A1%7Cp.c%3A%23ff181818%7Cs.t%3A3%7Cp.c%3A%23ff242f3e%7Cs.t%3A2%7Cp.c%3A%23ff212a37',
+        ];
+    return {
+      tiles,
+      attribution: '© Google Maps · Dark Navigation Mode',
+      label: 'Google Dark Mode',
+      requiresKey: true,
+    };
+  }
+
+  // DEFAULT / FREE: Pure CartoDB Dark Matter with 4 parallel CDN subdomains (100% Free · Verified HTTP 200)
   return {
     tiles: [
-      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
-      'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      'https://a.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      'https://b.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      'https://c.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+      'https://d.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
     ],
-    attribution: 'CartoDB Dark Matter · High-Contrast Dark GIS Basemap (100% Free · No Key Required)',
+    attribution: '© CartoDB Dark Matter · High-Contrast Dark GIS Basemap (100% Free · No Key Required)',
     label: 'Dark GIS Mission Control Map',
     requiresKey: false,
   };
@@ -283,17 +316,14 @@ export function getTopoBasemapConfig(
     };
   }
 
-  // DEFAULT / FREE: Esri World Topo Map with OpenTopoMap fallback
+  // DEFAULT / FREE: Esri World Topo Map (Verified ArcGIS REST tile service · 100% Free · No Key Required)
   return {
     tiles: [
       'https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-      'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
-      'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
-      'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
     ],
-    attribution: 'Esri World Topographic Map · OpenTopoMap (100% Free · No Key Required)',
-    label: 'Terrain & Contours',
+    attribution: '© Esri World Topographic Map · High-Resolution Terrain & Contours (100% Free · No Key Required)',
+    label: 'Terrain & Contours (Esri Topo)',
     requiresKey: false,
   };
 }

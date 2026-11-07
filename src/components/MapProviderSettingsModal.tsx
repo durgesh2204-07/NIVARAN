@@ -11,9 +11,11 @@ import {
   Zap,
 } from 'lucide-react';
 import {
+  getDarkBasemapConfig,
   getStoredMapProvider,
   getStoredProviderKey,
   getStreetBasemapConfig,
+  getTopoBasemapConfig,
   MapProviderType,
   setStoredMapProvider,
   setStoredProviderKey,
@@ -32,7 +34,6 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
   onClose,
   onProviderChanged,
 }) => {
-  const language = useAppStore((s) => s.language);
   const addToast = useAppStore((s) => s.addToast);
 
   const [provider, setProvider] = useState<MapProviderType>(getStoredMapProvider());
@@ -56,7 +57,10 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
     else if (provider === 'maptiler') activeKey = maptilerKey;
     else if (provider === 'custom') activeKey = customUrl;
 
-    const config = getStreetBasemapConfig(provider, activeKey);
+    const config =
+      provider === 'custom'
+        ? getStreetBasemapConfig(provider, activeKey)
+        : getDarkBasemapConfig(provider, activeKey);
     const sampleUrl = config.tiles[0];
     const res = await testTileConnectivity(sampleUrl);
 
@@ -65,11 +69,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
       result: {
         ok: res.ok,
         message: res.ok
-          ? language === 'hi'
-            ? 'कनेक्शन सफल: टाइल सर्वर सक्रिय है (HTTP 200 OK)'
-            : language === 'mr'
-            ? 'कनेक्शन यशस्वी: टाइल सर्व्हर सक्रिय आहे (HTTP 200 OK)'
-            : 'Connection successful: Tile server is active (HTTP 200 OK)'
+          ? `Connection verified: Tile service responded successfully (HTTP 200 OK) for ${config.label}`
           : res.message,
       },
     });
@@ -87,11 +87,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
     }
 
     addToast(
-      language === 'hi'
-        ? 'मानचित्र प्रदाता और एपीआई सेटिंग्स सहेजी गईं!'
-        : language === 'mr'
-        ? 'नकाशा प्रदाता आणि एपीआय सेटिंग्ज जतन केल्या!'
-        : 'Map provider and API configuration applied successfully!',
+      'Map provider and API configuration applied successfully!',
       'success'
     );
     onClose();
@@ -104,11 +100,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
       onProviderChanged('osm');
     }
     addToast(
-      language === 'hi'
-        ? 'निःशुल्क ओपन जीआईएस (OpenStreetMap) पर रीसेट किया गया'
-        : language === 'mr'
-        ? 'विनामूल्य ओपन जीआयएस (OpenStreetMap) वर रीसेट केले'
-        : 'Reverted to 100% Free Open GIS (OpenStreetMap & Esri)',
+      'Reverted to 100% Free Open GIS (CartoDB Dark Matter, Esri Topo & OpenStreetMap)',
       'info'
     );
     onClose();
@@ -133,18 +125,10 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                 id="map-provider-title"
                 className="text-base font-bold text-[var(--text-primary)] leading-tight"
               >
-                {language === 'hi'
-                  ? 'मानचित्र कार्टोग्राफी एवं स्थानिक परतें'
-                  : language === 'mr'
-                  ? 'नकाशा कार्टोग्राफी व भौगोलिक थर'
-                  : 'GIS Cartography & Spatial Layers'}
+                GIS Cartography & Basemap API Configuration
               </h3>
               <p className="text-[11px] text-[var(--text-secondary)]">
-                {language === 'hi'
-                  ? 'सुरक्षित राष्ट्रीय जीआईएस नेटवर्क सक्रिय · पूर्णतया सुरक्षित'
-                  : language === 'mr'
-                  ? 'सुरक्षित राष्ट्रीय जीआयएस नेटवर्क सक्रिय · पूर्णपणे सुरक्षित'
-                  : 'Secured National Geospatial Network Active · Zero Client Keys Required'}
+                Secured National Geospatial Network Active · Zero Client Keys Required
               </p>
             </div>
           </div>
@@ -165,23 +149,13 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
             <ShieldCheck className="w-5 h-5 text-[#059669] shrink-0 mt-0.5" />
             <div className="space-y-1">
               <div className="font-bold text-[#059669] text-xs flex items-center gap-1.5">
-                <span>
-                  {language === 'hi'
-                    ? 'सुरक्षित राष्ट्रीय भू-स्थानिक नेटवर्क: सुरक्षित एवं प्रमाणित'
-                    : language === 'mr'
-                    ? 'सुरक्षित राष्ट्रीय भू-स्थानिक नेटवर्क: सुरक्षित व प्रमाणित'
-                    : 'Secured National Geospatial Network · Authenticated & Encrypted'}
-                </span>
+                <span>Secured National Geospatial Network: Verified & Encrypted</span>
                 <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-100 dark:bg-emerald-900 text-[#059669] font-mono font-bold">
                   ACTIVE
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                {language === 'hi'
-                  ? 'निवारण जीआईएस आधिकारिक ओपनस्ट्रीटमैप (OpenStreetMap) और एश्री (Esri World Satellite) के सुरक्षित सर्वर का उपयोग करता है। सभी भू-स्थानिक परतें एन्क्रिप्टेड और सुरक्षित हैं।'
-                  : language === 'mr'
-                  ? 'निवारण जीआयएस अधिकृत ओपनस्ट्रीटनकाशा (OpenStreetMap) आणि एश्री (Esri World Satellite) च्या सुरक्षित सर्व्हरचा वापर करतो. सर्व भौगोलिक थर एन्क्रिप्टेड व सुरक्षित आहेत.'
-                  : 'NIVARAN GIS utilizes high-resolution official OpenStreetMap vector cartography and Esri World Satellite GIS via TLS 1.3 encrypted government gateway endpoints. No external keys exposed.'}
+                NIVARAN GIS utilizes high-contrast CartoDB Dark Matter, Esri World Topo Map, and OpenStreetMap vector cartography via TLS 1.3 encrypted endpoints. All maps function seamlessly without external API keys.
               </p>
             </div>
           </div>
@@ -189,11 +163,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
           {/* Provider Selection */}
           <div className="space-y-2">
             <label className="font-bold text-[11px] text-[var(--text-secondary)] uppercase tracking-wider block">
-              {language === 'hi'
-                ? 'मानचित्र प्रदाता चुनें'
-                : language === 'mr'
-                ? 'नकाशा प्रदाता निवडा'
-                : 'Select Map Cartography Provider'}
+              Select Map Cartography Provider
             </label>
 
             <div className="grid grid-cols-1 gap-2">
@@ -216,24 +186,84 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                   />
                   <div>
                     <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                      <span>OpenStreetMap Standard (Official)</span>
+                      <span>OpenStreetMap & Esri Topo (Recommended)</span>
                       <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-100 dark:bg-emerald-900 text-[#059669] font-semibold">
-                        {language === 'hi' ? 'निःशुल्क' : language === 'mr' ? 'मोफत' : 'Free / Open'}
+                        Free / No Key Required
                       </span>
                     </div>
                     <p className="text-[11px] text-[var(--text-secondary)]">
-                      {language === 'hi'
-                        ? 'संपूर्ण भारत और वैश्विक खुला मानचित्र · शून्य वॉटरमार्क'
-                        : language === 'mr'
-                        ? 'संपूर्ण भारत आणि जागतिक खुला नकाशा · शून्य वॉटरमार्क'
-                        : 'Official OpenStreetMap Foundation global raster tiles · No key needed'}
+                      Official CartoDB Dark Matter, Esri Topo Relief, Esri Satellite, and OpenStreetMap Street tiles
                     </p>
                   </div>
                 </div>
                 <Globe className="w-4 h-4 text-[#059669] shrink-0" />
               </label>
 
-              {/* 2. Google Maps (Optional) */}
+              {/* 2. Mapbox Streets & Dark v11 */}
+              <label
+                className={`p-3 rounded-[12px] border cursor-pointer transition-all flex items-center justify-between ${
+                  provider === 'mapbox'
+                    ? 'border-[#059669] bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm'
+                    : 'border-[var(--border)] hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="map-provider"
+                    value="mapbox"
+                    checked={provider === 'mapbox'}
+                    onChange={() => setProvider('mapbox')}
+                    className="accent-[#059669] w-4 h-4"
+                  />
+                  <div>
+                    <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                      <span>Mapbox (Dark v11 · Outdoors Topo · Streets v12)</span>
+                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">
+                        Requires Token
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)]">
+                      Custom high-fidelity Mapbox vector styling (requires public access token)
+                    </p>
+                  </div>
+                </div>
+                <Key className="w-4 h-4 text-purple-600 shrink-0" />
+              </label>
+
+              {/* 3. MapTiler */}
+              <label
+                className={`p-3 rounded-[12px] border cursor-pointer transition-all flex items-center justify-between ${
+                  provider === 'maptiler'
+                    ? 'border-[#059669] bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm'
+                    : 'border-[var(--border)] hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="map-provider"
+                    value="maptiler"
+                    checked={provider === 'maptiler'}
+                    onChange={() => setProvider('maptiler')}
+                    className="accent-[#059669] w-4 h-4"
+                  />
+                  <div>
+                    <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                      <span>MapTiler Cloud (DataViz Dark · Topo v2)</span>
+                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold">
+                        Requires Key
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)]">
+                      MapTiler Cloud vector & raster cartography services
+                    </p>
+                  </div>
+                </div>
+                <Key className="w-4 h-4 text-amber-600 shrink-0" />
+              </label>
+
+              {/* 4. Google Maps */}
               <label
                 className={`p-3 rounded-[12px] border cursor-pointer transition-all flex items-center justify-between ${
                   provider === 'google'
@@ -258,87 +288,11 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                       </span>
                     </div>
                     <p className="text-[11px] text-[var(--text-secondary)]">
-                      {language === 'hi'
-                        ? 'गूगल मैप्स सड़क और इलाके की टाइलें (वैकल्पिक एपीआई कुंजी)'
-                        : language === 'mr'
-                        ? 'गुगल नकाशे रस्ता आणि भूप्रदेश टाइल्स (पर्यायी एपीआय की)'
-                        : 'Google global street tiles with optional official Google Maps API key'}
+                      Google global street, dark navigation, and terrain elevation tiles
                     </p>
                   </div>
                 </div>
                 <Layers className="w-4 h-4 text-sky-600 shrink-0" />
-              </label>
-
-              {/* 3. Mapbox Streets */}
-              <label
-                className={`p-3 rounded-[12px] border cursor-pointer transition-all flex items-center justify-between ${
-                  provider === 'mapbox'
-                    ? 'border-[#059669] bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm'
-                    : 'border-[var(--border)] hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="map-provider"
-                    value="mapbox"
-                    checked={provider === 'mapbox'}
-                    onChange={() => setProvider('mapbox')}
-                    className="accent-[#059669] w-4 h-4"
-                  />
-                  <div>
-                    <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                      <span>Mapbox Streets v12</span>
-                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">
-                        Requires Token
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[var(--text-secondary)]">
-                      {language === 'hi'
-                        ? 'मैपबॉक्स टोकन आवश्यक (pk.eyJ1...)'
-                        : language === 'mr'
-                        ? 'मॅपबॉक्स टोकन आवश्यक (pk.eyJ1...)'
-                        : 'Custom high-fidelity Mapbox styling (requires public access token)'}
-                    </p>
-                  </div>
-                </div>
-                <Key className="w-4 h-4 text-purple-600 shrink-0" />
-              </label>
-
-              {/* 4. MapTiler */}
-              <label
-                className={`p-3 rounded-[12px] border cursor-pointer transition-all flex items-center justify-between ${
-                  provider === 'maptiler'
-                    ? 'border-[#059669] bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm'
-                    : 'border-[var(--border)] hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="map-provider"
-                    value="maptiler"
-                    checked={provider === 'maptiler'}
-                    onChange={() => setProvider('maptiler')}
-                    className="accent-[#059669] w-4 h-4"
-                  />
-                  <div>
-                    <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                      <span>MapTiler Cloud</span>
-                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold">
-                        Requires Key
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[var(--text-secondary)]">
-                      {language === 'hi'
-                        ? 'मैपटाइलर क्लाउड टाइल्स (कुंजी आवश्यक)'
-                        : language === 'mr'
-                        ? 'मॅपटायलर क्लाउड टाइल्स (की आवश्यक)'
-                        : 'MapTiler Cloud vector & raster streets service'}
-                    </p>
-                  </div>
-                </div>
-                <Key className="w-4 h-4 text-amber-600 shrink-0" />
               </label>
 
               {/* 5. Custom WMTS / XYZ */}
@@ -366,11 +320,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                       </span>
                     </div>
                     <p className="text-[11px] text-[var(--text-secondary)]">
-                      {language === 'hi'
-                        ? 'सरकारी भू-स्थानिक इंट्रानेट या निजी टाइल सर्वर URL'
-                        : language === 'mr'
-                        ? 'शासकीय भू-स्थानिक इंट्रानेट किंवा खाजगी टाइल सर्व्हर URL'
-                        : 'Self-hosted or state department WMTS/XYZ URL template'}
+                      Self-hosted or state department WMTS/XYZ tile URL template
                     </p>
                   </div>
                 </div>
@@ -379,16 +329,127 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
             </div>
           </div>
 
-          {/* Secure Backend Cartography Gateway Information */}
-          <div className="p-3.5 rounded-[12px] bg-slate-50 dark:bg-slate-800/50 border border-[var(--border)] space-y-1.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#059669]">
-              <ShieldCheck className="w-4 h-4 text-[#059669]" />
-              <span>Security & Integrity Certified</span>
+          {/* DYNAMIC KEY INPUT FIELDS BASED ON SELECTED PROVIDER */}
+          {provider === 'mapbox' && (
+            <div className="p-3.5 rounded-[12px] bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-purple-600" />
+                  Mapbox Public Access Token (pk.eyJ...)
+                </label>
+                <a
+                  href="https://account.mapbox.com/access-tokens/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-purple-600 hover:text-purple-700 dark:text-purple-400 font-semibold flex items-center gap-1"
+                >
+                  Get Free Token <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+              <input
+                type="text"
+                value={mapboxKey}
+                onChange={(e) => setMapboxKey(e.target.value)}
+                placeholder="pk.eyJ1IjoieW91ci11c2VybmFtZSIsImEiOiJ..."
+                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-purple-300 dark:border-purple-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <p className="text-[10px] text-purple-700 dark:text-purple-300">
+                Powers Dark GIS (dark-v11), Outdoors Topo (outdoors-v12), and Streets (streets-v12).
+              </p>
             </div>
-            <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-              All map tiles and spatial vectors are streamed via authenticated and encrypted government proxies. No private or client API keys are required or exposed to the browser.
-            </p>
-          </div>
+          )}
+
+          {provider === 'maptiler' && (
+            <div className="p-3.5 rounded-[12px] bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-600" />
+                  MapTiler Cloud API Key
+                </label>
+                <a
+                  href="https://cloud.maptiler.com/account/keys/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-amber-600 hover:text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1"
+                >
+                  Get Free Key <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+              <input
+                type="text"
+                value={maptilerKey}
+                onChange={(e) => setMaptilerKey(e.target.value)}
+                placeholder="e.g. 5xYz9AbC123DeFgHiJkL"
+                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <p className="text-[10px] text-amber-700 dark:text-amber-300">
+                Powers DataViz Dark GIS, Topo v2 elevation, and Streets v2 vector tiles.
+              </p>
+            </div>
+          )}
+
+          {provider === 'google' && (
+            <div className="p-3.5 rounded-[12px] bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-sky-900 dark:text-sky-200 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-sky-600" />
+                  Google Maps API Key (Optional)
+                </label>
+                <a
+                  href="https://console.cloud.google.com/google/maps-apis"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-sky-600 hover:text-sky-700 dark:text-sky-400 font-semibold flex items-center gap-1"
+                >
+                  Google Cloud Console <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+              <input
+                type="text"
+                value={googleKey}
+                onChange={(e) => setGoogleKey(e.target.value)}
+                placeholder="AIzaSy..."
+                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-sky-300 dark:border-sky-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+              <p className="text-[10px] text-sky-700 dark:text-sky-300">
+                Powers Google Street, Satellite Hybrid, and Terrain Topo layers.
+              </p>
+            </div>
+          )}
+
+          {provider === 'custom' && (
+            <div className="p-3.5 rounded-[12px] bg-slate-50 dark:bg-slate-800/60 border border-[var(--border)] space-y-2">
+              <label className="text-xs font-bold text-slate-900 dark:text-slate-200 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-[#059669]" />
+                Custom WMTS / XYZ Tile Server URL Template
+              </label>
+              <input
+                type="text"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                placeholder="https://your-domain.gov.in/tiles/{z}/{x}/{y}.png"
+                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          )}
+
+          {provider === 'osm' && (
+            <div className="p-3.5 rounded-[12px] bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
+              <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200 font-bold text-xs">
+                <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+                <span>100% Free Verified Open GIS Active</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                All 4 mission-critical basemaps work out of the box with zero external API key and zero rate limits:
+              </p>
+              <ul className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1 list-disc pl-4">
+                <li><strong>Dark GIS Mission Control:</strong> CartoDB Dark Matter (Multi-CDN parallel raster tiles)</li>
+                <li><strong>Topographic Map:</strong> Esri World Topo Map (ArcGIS REST High-Resolution Relief)</li>
+                <li><strong>Satellite 3D:</strong> Esri World Imagery + AWS Terrarium DEM Hillshade</li>
+                <li><strong>Street Map:</strong> OpenStreetMap Standard WGS84</li>
+              </ul>
+            </div>
+          )}
 
           {/* Test Status feedback */}
           {testStatus.result && (
@@ -415,34 +476,20 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
             <button
               type="button"
               onClick={handleResetToFree}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>
-                {language === 'hi'
-                  ? 'निःशुल्क ओपन जीआईएस रीसेट'
-                  : language === 'mr'
-                  ? 'विनामूल्य ओपन जीआयएस रीसेट'
-                  : 'Reset to Free Open GIS'}
-              </span>
+              <span>Reset to Free Open GIS</span>
             </button>
 
             <button
               type="button"
               onClick={handleTestConnection}
               disabled={testStatus.testing}
-              className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 text-amber-500" />
-              <span>
-                {testStatus.testing
-                  ? 'Testing...'
-                  : language === 'hi'
-                  ? 'कनेक्शन टेस्ट करें'
-                  : language === 'mr'
-                  ? 'कनेक्शन तपासा'
-                  : 'Test Connection'}
-              </span>
+              <span>{testStatus.testing ? 'Testing...' : 'Test Tile Connection'}</span>
             </button>
           </div>
 
@@ -450,23 +497,17 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
+              className="px-3.5 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
             >
-              {language === 'hi' ? 'रद्द करें' : language === 'mr' ? 'रद्द करा' : 'Cancel'}
+              Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>
-                {language === 'hi'
-                  ? 'लागू करें और सहेजें'
-                  : language === 'mr'
-                  ? 'लागू करा आणि जतन करा'
-                  : 'Apply & Save Settings'}
-              </span>
+              <span>Apply & Save Settings</span>
             </button>
           </div>
         </div>
