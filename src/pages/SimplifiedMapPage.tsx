@@ -60,7 +60,6 @@ import {
   Village,
   VolunteerMember,
 } from '../types';
-import { NdmaPortalFeaturesHub } from '../components/NdmaPortalFeaturesHub';
 import { GisCommandDecisionDeck } from '../components/GisCommandDecisionDeck';
 import {
   getStoredMapProvider,
@@ -3366,20 +3365,8 @@ export const SimplifiedMapPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Quick Jump to Portal Hub & GPS Guide */}
+          {/* Right: GPS Guide Button */}
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href="#ndma-portal-hub"
-              className="px-3 py-1.5 rounded-lg bg-[#E8F5E9] hover:bg-[#D1FAE5] dark:bg-emerald-900/40 dark:hover:bg-emerald-800/60 text-[#059669] dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 shadow-2xs border border-[#D1E7DD] dark:border-emerald-700 transition-colors"
-            >
-              <ShieldAlert className="w-4 h-4 text-[#059669] dark:text-emerald-400" strokeWidth={1.75} />
-              <span>
-                {language === 'hi'
-                  ? 'पोर्टल सुविधाएं ↓'
-                  : 'Portal Features ↓'}
-              </span>
-            </a>
-
             <button
               type="button"
               onClick={() => setGpsHelpExpanded((v) => !v)}
@@ -3674,7 +3661,7 @@ export const SimplifiedMapPage: React.FC = () => {
 
             <div>
               <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                IMD / NDMA Alert Tier (4 Levels)
+                Alert Severity Level (4 Tiers)
               </label>
               <select
                 value={zoneLevel}
@@ -5498,11 +5485,6 @@ export const SimplifiedMapPage: React.FC = () => {
               );
             })}
         </div>
-      </div>
-
-      {/* Complete NDMA Portal Features Hub (All 7 Official NDMA & SACHET Modules) */}
-      <div id="ndma-portal-hub" className="scroll-mt-20">
-        <NdmaPortalFeaturesHub defaultSection="sachet_cap" />
       </div>
 
       {/* Map Provider & API Key Modal */}
