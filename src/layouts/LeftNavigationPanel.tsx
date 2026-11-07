@@ -174,9 +174,9 @@ export const MASTER_NAV_GROUPS: NavGroupDef[] = [
       {
         num: 3.8,
         to: '/climate-anomaly-detection',
-        labelEn: 'Climate Anomaly Detection',
-        labelHi: 'Climate Anomaly Detection',
-        labelMr: 'Climate Anomaly Detection',
+        labelEn: 'AI Climate Anomaly Detection',
+        labelHi: 'AI Climate Anomaly Detection',
+        labelMr: 'AI Climate Anomaly Detection',
         descEn: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal',
         descHi: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal',
         descMr: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal',

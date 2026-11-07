@@ -4769,7 +4769,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 type="button"
                 onClick={() => navigate(selectedVillage ? `/climate-anomaly-detection?villageId=${selectedVillage.id}` : '/climate-anomaly-detection')}
                 className="py-1 px-1 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800 hover:bg-purple-100 transition-colors text-center truncate"
-                title="Climate Anomaly Detection"
+                title="AI Climate Anomaly Detection"
               >
                 Anomalies
               </button>

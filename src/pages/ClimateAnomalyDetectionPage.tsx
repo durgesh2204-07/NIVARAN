@@ -138,7 +138,7 @@ export const ClimateAnomalyDetectionPage: React.FC = () => {
             </div>
             <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
               <Activity className="w-8 h-8 text-[#008060]" />
-              Climate Anomaly Detection Engine
+              AI Climate Anomaly Detection
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
               Real-time geospatial surveillance identifying severe meteorological, hydrological, and vegetative deviations against 30-year climatological normal thresholds across Maharashtra.

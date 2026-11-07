@@ -328,11 +328,11 @@ export const App: React.FC = () => {
                 }
               />
 
-              {/* 3.8. CLIMATE ANOMALY DETECTION */}
+              {/* 3.8. AI CLIMATE ANOMALY DETECTION */}
               <Route
                 path="/climate-anomaly-detection"
                 element={
-                  <RoleGuard allowed={ALL_ROLES} routeName="Climate Anomaly Detection">
+                  <RoleGuard allowed={ALL_ROLES} routeName="AI Climate Anomaly Detection">
                     <ClimateAnomalyDetectionPage />
                   </RoleGuard>
                 }

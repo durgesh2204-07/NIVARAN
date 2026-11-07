@@ -338,7 +338,7 @@ export const VillageDetailDrawer: React.FC<VillageDetailDrawerProps> = ({
               navigate(`/climate-anomaly-detection?villageId=${village.id}`);
             }}
             className="py-1.5 px-2 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 text-[11px] font-semibold text-center hover:bg-purple-100 transition-colors truncate"
-            title="Climate Anomaly Detection"
+            title="AI Climate Anomaly Detection"
           >
             Anomalies
           </button>

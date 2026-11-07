@@ -140,9 +140,9 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   },
   {
     to: '/climate-anomaly-detection',
-    labelEn: 'Climate Anomaly Detection',
-    labelHi: 'Climate Anomaly Detection',
-    labelMr: 'Climate Anomaly Detection',
+    labelEn: 'AI Climate Anomaly Detection',
+    labelHi: 'AI Climate Anomaly Detection',
+    labelMr: 'AI Climate Anomaly Detection',
     icon: Activity,
     roles: ALL_ROLES,
   },

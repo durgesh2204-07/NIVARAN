@@ -40,7 +40,7 @@ const QUICK_NAV_ROUTES = [
   { path: '/planning', name: 'Relocation Site Planner', desc: 'Safe plateau carrying capacity & zoning', icon: MapPin },
   { path: '/climate-vulnerability', name: 'Village Climate Vulnerability', desc: '0–100 vulnerability score, factor breakdown & transparent AI explanation', icon: Gauge },
   { path: '/climate-impact-prediction', name: 'AI Climate Impact Prediction', desc: 'Forecast multi-hazard impacts on villages, agriculture, and water', icon: TrendingUp },
-  { path: '/climate-anomaly-detection', name: 'Climate Anomaly Detection', desc: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal', icon: Activity },
+  { path: '/climate-anomaly-detection', name: 'AI Climate Anomaly Detection', desc: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal', icon: Activity },
   { path: '/community-reports', name: 'Field Hazard Reports', desc: 'Crowdsourced community incidents & hazard logs', icon: Users },
 ];
 
