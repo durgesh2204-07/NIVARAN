@@ -25,7 +25,7 @@ export type TextSize = '100' | '115' | '130';
 
 export type Language = 'en' | 'hi' | 'mr';
 
-export type HazardType = 'landslide' | 'flood' | 'erosion' | 'cloudburst' | 'cyclone';
+export type HazardType = 'landslide' | 'flood' | 'erosion' | 'cloudburst' | 'cyclone' | 'drought' | 'heatwave';
 
 export type RiskLevel = 'Immediate' | 'Short-term' | 'Medium-term' | 'Safe';
 

@@ -97,6 +97,32 @@ const DOS_AND_DONTS: Record<
       'Do not spread unverified social media rumours; rely on IMD cyclone bulletins.',
     ],
   },
+  drought: {
+    title: 'Agricultural & Meteorological Drought Resilience',
+    dos: [
+      'Adopt micro-irrigation (drip/sprinkler) and mulch farm beds to preserve soil moisture.',
+      'Harvest rooftop rainwater into village farm ponds (Shet-tale) before dry season.',
+      'Access subsidized cattle fodder camps and Jal Jeevan Mission tanker delivery points.',
+    ],
+    donts: [
+      'Do not over-extract groundwater beyond certified safe aquifer yields.',
+      'Do not cultivate water-intensive sugarcane in rain-shadow talukas during severe deficit.',
+      'Do not burn crop residue or waste which increases soil moisture evaporation.',
+    ],
+  },
+  heatwave: {
+    title: 'Extreme Heatwave & Thermal Stress Protection',
+    dos: [
+      'Drink plenty of oral rehydration fluids (ORS, butter milk, jaljeera) throughout the day.',
+      'Stay indoors or under cool shade between 12:00 PM and 4:00 PM peak radiation hours.',
+      'Ensure livestock and poultry have ample shaded pens and continuous clean drinking water.',
+    ],
+    donts: [
+      'Do not perform strenuous manual farm labor outdoors during peak noon heat without rest breaks.',
+      'Never leave children, elderly persons, or pets unattended in parked vehicles.',
+      'Avoid high-protein and stale food that increases metabolic heat strain.',
+    ],
+  },
 };
 
 export const CitizenPortalPage: React.FC = () => {

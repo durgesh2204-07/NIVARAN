@@ -24,6 +24,9 @@ const GisWorkspacePage = lazy(() =>
 const HazardMapPage = lazy(() =>
   import('./pages/HazardMapPage').then((m) => ({ default: m.HazardMapPage }))
 );
+const ClimateIntelligencePage = lazy(() =>
+  import('./pages/ClimateIntelligencePage').then((m) => ({ default: m.ClimateIntelligencePage }))
+);
 const DashboardPage = lazy(() =>
   import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
 );
@@ -282,6 +285,16 @@ export const App: React.FC = () => {
                 element={
                   <RoleGuard allowed={ALL_ROLES} routeName="Hazard Intelligence">
                     <HazardMapPage />
+                  </RoleGuard>
+                }
+              />
+
+              {/* 3.5. AI CLIMATE INTELLIGENCE & PREDICTION */}
+              <Route
+                path="/climate-intelligence"
+                element={
+                  <RoleGuard allowed={ALL_ROLES} routeName="AI Climate Intelligence">
+                    <ClimateIntelligencePage />
                   </RoleGuard>
                 }
               />

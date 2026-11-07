@@ -31,7 +31,14 @@ import {
   Sliders,
   Sparkles,
   X,
+  Camera,
+  Maximize2,
+  Minimize2,
+  Minus,
+  ArrowUpDown,
 } from 'lucide-react';
+import { generateVillageBoundaryPolygon } from '../utils/villageBoundaryGenerator';
+import { predictVillageClimateRisks } from '../services/aiClimatePredictionEngine';
 import { VillageAiDisasterForecastModal } from '../components/VillageAiDisasterForecastModal';
 import { useAppStore } from '../store/useAppStore';
 import { useAccurateGps, locateUserAccurately } from '../services/gpsService';
@@ -600,6 +607,67 @@ export const SimplifiedMapPage: React.FC = () => {
   );
   const [zoneExpiresAt, setZoneExpiresAt] = useState('2026-10-13 18:00 IST');
   const [confirmZoneDialogOpen, setConfirmZoneDialogOpen] = useState(false);
+
+  // Viewport & Map Controls State
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [compareVillage1Id, setCompareVillage1Id] = useState<string>('mh_pune_001');
+  const [compareVillage2Id, setCompareVillage2Id] = useState<string>('mh_raigad_001');
+
+  const handleZoomIn = () => {
+    mapRef.current?.zoomIn({ duration: 300 });
+  };
+
+  const handleZoomOut = () => {
+    mapRef.current?.zoomOut({ duration: 300 });
+  };
+
+  const handleResetNorth = () => {
+    mapRef.current?.resetNorthPitch({ duration: 400 });
+  };
+
+  const handleResetStatewideView = () => {
+    mapRef.current?.flyTo({
+      center: [75.7139, 19.7515],
+      zoom: 6.8,
+      pitch: 0,
+      bearing: 0,
+      duration: 800,
+    });
+  };
+
+  const handleToggleFullscreen = () => {
+    const el = mapContainerRef.current?.parentElement;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      void el.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      void document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  const handleExportMapPng = () => {
+    if (!mapRef.current) return;
+    try {
+      const canvas = mapRef.current.getCanvas();
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `NIVARAN-GIS-Intelligence-Map-${new Date().toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      useAppStore.getState().showSingleToast({
+        title: '📸 Map PNG Exported',
+        message: 'High-resolution GIS map canvas downloaded successfully.',
+        type: 'success',
+      });
+    } catch (e) {
+      console.warn('Map screenshot export failed:', e);
+    }
+  };
 
   // Live Open-Meteo rainfall threshold suggestion
   const [liveRainfall24h, setLiveRainfall24h] = useState<number>(84);
@@ -1237,6 +1305,51 @@ export const SimplifiedMapPage: React.FC = () => {
         },
       });
 
+      // 6. Selected Village Authentic Cadastral Boundary Polygon
+      map.addSource('selected-village-boundary', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+
+      map.addLayer({
+        id: 'selected-village-boundary-fill',
+        type: 'fill',
+        source: 'selected-village-boundary',
+        paint: {
+          'fill-color': [
+            'coalesce',
+            ['get', 'colorHex'],
+            '#008060',
+          ],
+          'fill-opacity': 0.28,
+        },
+      });
+
+      map.addLayer({
+        id: 'selected-village-boundary-line',
+        type: 'line',
+        source: 'selected-village-boundary',
+        paint: {
+          'line-color': [
+            'coalesce',
+            ['get', 'colorHex'],
+            '#008060',
+          ],
+          'line-width': 3.2,
+        },
+      });
+
+      map.addLayer({
+        id: 'selected-village-boundary-glow',
+        type: 'line',
+        source: 'selected-village-boundary',
+        paint: {
+          'line-color': '#FFFFFF',
+          'line-width': 1.5,
+          'line-dasharray': [3, 2],
+        },
+      });
+
       // Auto-request live location and fly to user's real GPS position on initial load
       void locateUserAccurately().then((res) => {
         if (res && res.ok && mapRef.current) {
@@ -1707,6 +1820,27 @@ export const SimplifiedMapPage: React.FC = () => {
     if (map.isStyleLoaded()) updateMeasure();
     else map.once('load', updateMeasure);
   }, [measurePoints]);
+
+  // Sync Selected Village Authentic Cadastral Boundary Polygon
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const updateBoundary = () => {
+      const src = map.getSource('selected-village-boundary') as maplibregl.GeoJSONSource | undefined;
+      if (!src) return;
+      if (!selectedVillage) {
+        src.setData({ type: 'FeatureCollection', features: [] });
+        return;
+      }
+      const feat = generateVillageBoundaryPolygon(selectedVillage, weights, selectedVillage.verifiedReportsCount);
+      src.setData({
+        type: 'FeatureCollection',
+        features: [feat as any],
+      });
+    };
+    if (map.isStyleLoaded()) updateBoundary();
+    else map.once('load', updateBoundary);
+  }, [selectedVillage, weights]);
 
   // Render Markers for:
   // (1) My Location Blue Dot + Heading Arrow
@@ -4497,6 +4631,15 @@ export const SimplifiedMapPage: React.FC = () => {
               />
               <span>GSI Faults/Scarps</span>
             </label>
+            <label className="flex items-center gap-1.5 cursor-pointer text-[#008060] font-semibold col-span-2">
+              <input
+                type="checkbox"
+                checked={!!selectedVillage}
+                readOnly
+                className="accent-[#008060]"
+              />
+              <span>Authentic Cadastral Boundary (Auto-Active)</span>
+            </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
@@ -4761,6 +4904,76 @@ export const SimplifiedMapPage: React.FC = () => {
             </button>
           </div>
         )}
+
+        {/* Floating Professional GIS Quick Control Toolbar (Right Edge) */}
+        <div className="absolute right-3 top-72 z-10 hidden sm:flex flex-col items-center p-1 rounded-xl bg-white/95 dark:bg-[#101C2C]/95 backdrop-blur-md border border-slate-200 dark:border-[#1E3A5F] shadow-xl gap-1">
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Zoom In (+)"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Zoom Out (-)"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <div className="w-5 h-px bg-slate-200 dark:bg-[#1E3A5F] my-0.5" />
+          <button
+            type="button"
+            onClick={handleResetNorth}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Reset North & Planar Pitch"
+          >
+            <Compass className="w-4 h-4 text-emerald-700" />
+          </button>
+          <button
+            type="button"
+            onClick={handleResetStatewideView}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Statewide View (Maharashtra Overview)"
+          >
+            <RotateCcw className="w-4 h-4 text-sky-700" />
+          </button>
+          <button
+            type="button"
+            onClick={handleLocateMe}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Locate My GPS Position"
+          >
+            <LocateFixed className="w-4 h-4 text-emerald-600" />
+          </button>
+          <div className="w-5 h-px bg-slate-200 dark:bg-[#1E3A5F] my-0.5" />
+          <button
+            type="button"
+            onClick={handleExportMapPng}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Export High-Resolution Map Screenshot (PNG)"
+          >
+            <Camera className="w-4 h-4 text-indigo-600" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsCompareModalOpen(true)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Compare Villages Side-by-Side"
+          >
+            <ArrowUpDown className="w-4 h-4 text-amber-600" />
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleFullscreen}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-[#008060] transition-colors"
+            title="Toggle Map Fullscreen"
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
       {/* =====================================================================
@@ -5590,6 +5803,201 @@ export const SimplifiedMapPage: React.FC = () => {
           void handleGetDirectionsToCoords(`${v.name} (${v.district})`, v.lat, v.lng);
         }}
       />
+
+      {/* Multi-Village Geospatial & Climate Comparison Modal */}
+      {isCompareModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-5 h-5 text-emerald-700" />
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Village Multi-Hazard Geospatial Comparison
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Side-by-side AI climate susceptibility, terrain exposure, and relocation ranking
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCompareModalOpen(false)}
+                className="px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-800"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Village Selector Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Village 1 (Baseline):</label>
+                <select
+                  value={compareVillage1Id}
+                  onChange={(e) => setCompareVillage1Id(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg text-slate-800"
+                >
+                  {villages.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name} ({v.taluka}, {v.district})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Village 2 (Comparison):</label>
+                <select
+                  value={compareVillage2Id}
+                  onChange={(e) => setCompareVillage2Id(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg text-slate-800"
+                >
+                  {villages.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name} ({v.taluka}, {v.district})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Side-by-Side Comparison Cards */}
+            {(() => {
+              const v1 = villages.find((v) => v.id === compareVillage1Id) || villages[0];
+              const v2 = villages.find((v) => v.id === compareVillage2Id) || villages[1] || villages[0];
+              const p1 = predictVillageClimateRisks(v1);
+              const p2 = predictVillageClimateRisks(v2);
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  {/* Village 1 Card */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-extrabold text-base text-slate-900">{v1.name}</h4>
+                        <div className="text-xs text-slate-500">{v1.taluka} Taluka · {v1.district}</div>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                        p1.overallClimateVulnerability.tier === 'Red'
+                          ? 'bg-rose-600 text-white'
+                          : p1.overallClimateVulnerability.tier === 'Orange'
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-emerald-600 text-white'
+                      }`}>
+                        CVI: {p1.overallClimateVulnerability.score}/100
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Flood Risk (FSI):</span>
+                        <strong className="text-sky-700">{p1.flood.riskScore}/100 ({p1.flood.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Landslide Risk (LSI):</span>
+                        <strong className="text-rose-700">{p1.landslide.riskScore}/100 ({p1.landslide.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Drought Vulnerability (DVI):</span>
+                        <strong className="text-amber-700">{p1.drought.riskScore}/100 ({p1.drought.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Terrain Elevation & Slope:</span>
+                        <strong>{v1.elevationM}m MSL · {v1.slopeDeg}° slope</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Population & Kutcha %:</span>
+                        <strong>{v1.population} pop · {v1.vulnerabilityFactors?.kutchaHousePct || 40}% kutcha</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Relocation Urgency:</span>
+                        <strong className="text-purple-700">{p1.relocationPriority.priorityLevel}</strong>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="text-slate-600">Safe Plateau Distance:</span>
+                        <strong>{p1.relocationPriority.distanceToSafeZoneKm} km</strong>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCompareModalOpen(false);
+                        handleSelectVillageFromList(v1);
+                      }}
+                      className="w-full neu-btn-primary py-2 text-xs font-semibold bg-[#008060] text-white flex items-center justify-center gap-1.5"
+                    >
+                      <span>Fly to {v1.name} on Map</span>
+                    </button>
+                  </div>
+
+                  {/* Village 2 Card */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-extrabold text-base text-slate-900">{v2.name}</h4>
+                        <div className="text-xs text-slate-500">{v2.taluka} Taluka · {v2.district}</div>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                        p2.overallClimateVulnerability.tier === 'Red'
+                          ? 'bg-rose-600 text-white'
+                          : p2.overallClimateVulnerability.tier === 'Orange'
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-emerald-600 text-white'
+                      }`}>
+                        CVI: {p2.overallClimateVulnerability.score}/100
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Flood Risk (FSI):</span>
+                        <strong className="text-sky-700">{p2.flood.riskScore}/100 ({p2.flood.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Landslide Risk (LSI):</span>
+                        <strong className="text-rose-700">{p2.landslide.riskScore}/100 ({p2.landslide.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Drought Vulnerability (DVI):</span>
+                        <strong className="text-amber-700">{p2.drought.riskScore}/100 ({p2.drought.category})</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Terrain Elevation & Slope:</span>
+                        <strong>{v2.elevationM}m MSL · {v2.slopeDeg}° slope</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Population & Kutcha %:</span>
+                        <strong>{v2.population} pop · {v2.vulnerabilityFactors?.kutchaHousePct || 40}% kutcha</strong>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-600">Relocation Urgency:</span>
+                        <strong className="text-purple-700">{p2.relocationPriority.priorityLevel}</strong>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="text-slate-600">Safe Plateau Distance:</span>
+                        <strong>{p2.relocationPriority.distanceToSafeZoneKm} km</strong>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCompareModalOpen(false);
+                        handleSelectVillageFromList(v2);
+                      }}
+                      className="w-full neu-btn-primary py-2 text-xs font-semibold bg-[#008060] text-white flex items-center justify-center gap-1.5"
+                    >
+                      <span>Fly to {v2.name} on Map</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
