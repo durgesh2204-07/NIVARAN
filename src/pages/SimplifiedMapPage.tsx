@@ -473,16 +473,16 @@ export const SimplifiedMapPage: React.FC = () => {
   const [showRiverHydrology, setShowRiverHydrology] = useState(true);
   const [showGsiFaultLines, setShowGsiFaultLines] = useState(true);
   const [alertFilterLevel, setAlertFilterLevel] = useState<'ALL' | AlertZoneLevel>('ALL');
-  const [basemapMode, setBasemapMode] = useState<'street' | 'satellite' | 'topo' | 'dark'>(() => {
+  const [basemapMode, setBasemapMode] = useState<'street' | 'satellite' | 'topo'>(() => {
     try {
       const saved = window.localStorage.getItem('nivaran_basemap_mode');
-      if (saved === 'dark' || saved === 'topo' || saved === 'satellite' || saved === 'street') {
+      if (saved === 'topo' || saved === 'satellite' || saved === 'street') {
         return saved;
       }
     } catch {
       // ignore
     }
-    return 'dark';
+    return 'street';
   });
 
   useEffect(() => {
@@ -932,8 +932,7 @@ export const SimplifiedMapPage: React.FC = () => {
             id: 'map-solid-background',
             type: 'background',
             paint: {
-              'background-color':
-                basemapMode === 'dark' ? '#090D14' : basemapMode === 'topo' ? '#EBF0E6' : '#0F1E2E',
+              'background-color': basemapMode === 'topo' ? '#EBF0E6' : '#0F1E2E',
             },
           },
           {
@@ -965,12 +964,6 @@ export const SimplifiedMapPage: React.FC = () => {
             type: 'raster',
             source: 'open_topo',
             layout: { visibility: basemapMode === 'topo' ? 'visible' : 'none' },
-          },
-          {
-            id: 'basemap-dark',
-            type: 'raster',
-            source: 'carto_dark',
-            layout: { visibility: basemapMode === 'dark' ? 'visible' : 'none' },
           },
           {
             id: 'basemap-hillshade',
@@ -1496,13 +1489,6 @@ export const SimplifiedMapPage: React.FC = () => {
           basemapMode === 'topo' ? 'visible' : 'none'
         );
       }
-      if (map.getLayer('basemap-dark')) {
-        map.setLayoutProperty(
-          'basemap-dark',
-          'visibility',
-          basemapMode === 'dark' ? 'visible' : 'none'
-        );
-      }
       if (map.getLayer('basemap-hillshade')) {
         map.setLayoutProperty(
           'basemap-hillshade',
@@ -1512,19 +1498,19 @@ export const SimplifiedMapPage: React.FC = () => {
         map.setPaintProperty(
           'basemap-hillshade',
           'hillshade-shadow-color',
-          basemapMode === 'dark' ? '#000000' : '#334155'
+          '#334155'
         );
         map.setPaintProperty(
           'basemap-hillshade',
           'hillshade-highlight-color',
-          basemapMode === 'dark' ? '#1E293B' : '#FFFFFF'
+          '#FFFFFF'
         );
       }
       if (map.getLayer('map-solid-background')) {
         map.setPaintProperty(
           'map-solid-background',
           'background-color',
-          basemapMode === 'dark' ? '#090D14' : basemapMode === 'topo' ? '#EBF0E6' : '#0F1E2E'
+          basemapMode === 'topo' ? '#EBF0E6' : '#0F1E2E'
         );
       }
 
@@ -1532,19 +1518,19 @@ export const SimplifiedMapPage: React.FC = () => {
         map.setPaintProperty(
           'user-gps-accuracy-fill',
           'fill-color',
-          basemapMode === 'dark' ? '#06B6D4' : '#059669'
+          '#059669'
         );
         map.setPaintProperty(
           'user-gps-accuracy-fill',
           'fill-opacity',
-          basemapMode === 'dark' ? 0.22 : 0.16
+          0.16
         );
       }
       if (map.getLayer('user-gps-accuracy-line')) {
         map.setPaintProperty(
           'user-gps-accuracy-line',
           'line-color',
-          basemapMode === 'dark' ? '#22D3EE' : '#059669'
+          '#059669'
         );
       }
 
@@ -1894,12 +1880,9 @@ export const SimplifiedMapPage: React.FC = () => {
       return;
     }
 
-    const isDark = basemapMode === 'dark';
     const headingHtml =
       gps.headingDeg !== null
-        ? `<div style="transform: rotate(${gps.headingDeg}deg)" class="${
-            isDark ? 'text-cyan-400' : 'text-[#059669]'
-          } font-bold text-xs leading-none">▲</div>`
+        ? `<div style="transform: rotate(${gps.headingDeg}deg)" class="text-[#059669] font-bold text-xs leading-none">▲</div>`
         : '';
     const labelText = gps.shortAddressInWords || 'My Live Location';
     const accuracyText = `±${Math.round(gps.accuracyMeters)}m`;
@@ -1915,18 +1898,10 @@ export const SimplifiedMapPage: React.FC = () => {
       <div class="relative flex flex-col items-center group">
         <div id="user-gps-heading">${headingHtml}</div>
         <div class="relative flex items-center justify-center">
-          <span class="absolute w-9 h-9 rounded-full ${
-            isDark ? 'bg-cyan-400/40 ring-4 ring-cyan-400/20' : 'bg-emerald-500/35'
-          } animate-ping"></span>
-          <span class="w-4 h-4 rounded-full ${
-            isDark ? 'bg-[#00F0FF] shadow-[0_0_14px_#00F0FF]' : 'bg-[#059669] shadow-lg'
-          } border-2 border-white block z-10"></span>
+          <span class="absolute w-8 h-8 rounded-full bg-emerald-500/35 animate-ping"></span>
+          <span class="w-4 h-4 rounded-full bg-[#059669] border-2 border-white shadow-lg block z-10"></span>
         </div>
-        <span class="mt-1 px-2.5 py-0.5 rounded-full ${
-          isDark
-            ? 'bg-[#041c2c]/95 text-cyan-300 border-cyan-400/70 shadow-[0_0_12px_rgba(0,240,255,0.4)]'
-            : 'bg-[#059669] text-white border-white shadow-md'
-        } text-[10.5px] font-bold whitespace-nowrap border flex items-center gap-1 backdrop-blur-xs">
+        <span class="mt-1 px-2.5 py-0.5 rounded-full bg-[#059669] text-white text-[10.5px] font-bold shadow-md whitespace-nowrap border border-white flex items-center gap-1">
           <span id="user-gps-label">🎯 ${labelText}</span>
           <span id="user-gps-acc" class="opacity-85 font-mono text-[9px]">(${accuracyText})</span>
         </span>
@@ -1945,15 +1920,9 @@ export const SimplifiedMapPage: React.FC = () => {
 
     const popup = new maplibregl.Popup({ offset: 20, closeButton: true }).setHTML(`
       <div style="font-family: system-ui, sans-serif; padding: 6px; min-width: 220px; max-width: 300px;">
-        <div style="font-weight: 800; font-size: 13px; color: ${
-          isDark ? '#06B6D4' : '#059669'
-        }; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <div style="font-weight: 800; font-size: 13px; color: #059669; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
           <span>📍 Live GPS Location</span>
-          <span style="font-size: 10px; background: ${
-            isDark ? '#083344' : '#D1E7DD'
-          }; color: ${isDark ? '#67E8F9' : '#0F5132'}; padding: 1px 6px; border-radius: 9999px;">${
-      gps.qualityBadge
-    }</span>
+          <span style="font-size: 10px; background: #D1E7DD; color: #0F5132; padding: 1px 6px; border-radius: 9999px;">${gps.qualityBadge}</span>
         </div>
         <div style="font-size: 12px; font-weight: 700; color: #0F291E; line-height: 1.35; margin-bottom: 6px;">
           ${gps.addressInWords || gps.shortAddressInWords || 'Live Position'}
@@ -1984,7 +1953,6 @@ export const SimplifiedMapPage: React.FC = () => {
     gps.addressInWords,
     gps.qualityBadge,
     gps.updatedAtIst,
-    basemapMode,
   ]);
 
   // 1B. Active Alert Zone Centroid Badges on Map
@@ -4392,20 +4360,6 @@ export const SimplifiedMapPage: React.FC = () => {
             <span>Topo</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setBasemapMode('dark')}
-            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              basemapMode === 'dark'
-                ? 'bg-slate-900 text-cyan-300 border border-cyan-400 shadow-sm shadow-cyan-500/25 ring-1 ring-cyan-400/40'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
-            }`}
-            title="Dark GIS Map — High-Contrast Mission Control Basemap (CartoDB Dark Matter / Mapbox Dark)"
-          >
-            <Moon className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400" />
-            <span>Dark GIS</span>
-          </button>
-
           <div className="h-4 w-px bg-slate-200 dark:bg-[#1E3A5F] mx-0.5" />
 
           {/* Explicit 2D View Button */}
@@ -4521,18 +4475,6 @@ export const SimplifiedMapPage: React.FC = () => {
           >
             <Mountain className="w-3 h-3" />
             <span>Topo</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBasemapMode('dark')}
-            className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${
-              basemapMode === 'dark'
-                ? 'bg-slate-900 text-cyan-300 border border-cyan-400'
-                : 'text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            <Moon className="w-3 h-3 text-cyan-400" />
-            <span>Dark</span>
           </button>
           <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 mx-0.5" />
           <button

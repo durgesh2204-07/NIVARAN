@@ -138,8 +138,6 @@ export function getBasemapRasterConfig(style: BasemapStyle): {
 } {
   const provider = getStoredMapProvider();
   switch (style) {
-    case 'osm':
-      return getStreetBasemapConfig(provider);
     case 'satellite':
       return {
         tiles: getSatelliteBasemapConfig().imageryTiles,
@@ -148,9 +146,9 @@ export function getBasemapRasterConfig(style: BasemapStyle): {
       };
     case 'terrain':
       return getTopoBasemapConfig(provider);
-    case 'dark':
+    case 'osm':
     default:
-      return getDarkBasemapConfig(provider);
+      return getStreetBasemapConfig(provider);
   }
 }
 

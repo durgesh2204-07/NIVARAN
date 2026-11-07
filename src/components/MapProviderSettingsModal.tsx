@@ -84,7 +84,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
     const config =
       provider === 'custom'
         ? getStreetBasemapConfig(provider, activeKey)
-        : getDarkBasemapConfig(provider, activeKey);
+        : getStreetBasemapConfig(provider, activeKey);
     const sampleUrl = config.tiles[0];
     const res = await testTileConnectivity(sampleUrl);
 
@@ -354,23 +354,6 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
           </div>
 
           {/* DYNAMIC KEY INPUT FIELDS BASED ON SELECTED PROVIDER */}
-          {provider === 'osm' && (
-            <div className="p-3.5 rounded-[12px] bg-slate-900/90 border border-cyan-500/50 space-y-2 text-cyan-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
-                  <span className="font-bold text-xs text-white">CartoDB Dark Matter GIS · Mission Control</span>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 font-mono border border-cyan-700">
-                  Active · 100% Free · HTTP 200 OK
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Active high-contrast Dark GIS basemap powered by 4 parallel CDN subdomains (<code>https://&#123;a-d&#125;.basemaps.cartocdn.com/rastertiles/dark_all/&#123;z&#125;/&#123;x&#125;/&#123;y&#125;.png</code>). Zero API key required, zero watermarks, verified CORS enabled.
-              </p>
-            </div>
-          )}
-
           {provider === 'mapbox' && (
             <div className="p-3.5 rounded-[12px] bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-2">
               <div className="flex items-center justify-between">
@@ -395,7 +378,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                 className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-purple-300 dark:border-purple-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <p className="text-[10px] text-purple-700 dark:text-purple-300">
-                Powers Dark GIS (dark-v11), Outdoors Topo (outdoors-v12), and Streets (streets-v12).
+                Powers Outdoors Topo (outdoors-v12) and Streets (streets-v12).
               </p>
             </div>
           )}
@@ -424,7 +407,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                 className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-[#071320] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
               <p className="text-[10px] text-amber-700 dark:text-amber-300">
-                Powers DataViz Dark GIS, Topo v2 elevation, and Streets v2 vector tiles.
+                Powers Topo v2 elevation and Streets v2 vector tiles.
               </p>
             </div>
           )}
@@ -474,6 +457,7 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
             </div>
           )}
 
+          {/* Zero-Key Open GIS Guarantee */}
           {provider === 'osm' && (
             <div className="p-3.5 rounded-[12px] bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200 font-bold text-xs">
@@ -481,13 +465,12 @@ export const MapProviderSettingsModal: React.FC<MapProviderSettingsModalProps> =
                 <span>100% Free Verified Open GIS Active</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                All 4 mission-critical basemaps work out of the box with zero external API key and zero rate limits:
+                Mission-critical basemaps work out of the box with zero external API key and zero rate limits:
               </p>
               <ul className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1 list-disc pl-4">
-                <li><strong>Dark GIS Mission Control:</strong> CartoDB Dark Matter (Multi-CDN parallel raster tiles)</li>
+                <li><strong>Street Map:</strong> OpenStreetMap Standard WGS84</li>
                 <li><strong>Topographic Map:</strong> Esri World Topo Map (ArcGIS REST High-Resolution Relief)</li>
                 <li><strong>Satellite 3D:</strong> Esri World Imagery + AWS Terrarium DEM Hillshade</li>
-                <li><strong>Street Map:</strong> OpenStreetMap Standard WGS84</li>
               </ul>
             </div>
           )}
