@@ -315,7 +315,7 @@ export const PowerControl: React.FC = () => {
             {/* Checked At timestamp */}
             {healthData?.checkedAt && (
               <div className="text-[10px] font-mono text-slate-400 text-center mt-2.5">
-                Last Verified: {healthData.checkedAt} · Zero API Keys Exposed
+                Last Security Sync: {healthData.checkedAt} · System Active & Secure
               </div>
             )}
           </motion.div>
