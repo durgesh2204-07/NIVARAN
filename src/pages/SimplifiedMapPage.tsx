@@ -29,8 +29,10 @@ import {
   Search,
   ShieldAlert,
   Sliders,
+  Sparkles,
   X,
 } from 'lucide-react';
+import { VillageAiDisasterForecastModal } from '../components/VillageAiDisasterForecastModal';
 import { useAppStore } from '../store/useAppStore';
 import { useAccurateGps, locateUserAccurately } from '../services/gpsService';
 import { getAlertLevelMeta, getShelterStatusMeta } from '../utils/alertUtils';
@@ -553,6 +555,20 @@ export const SimplifiedMapPage: React.FC = () => {
     rainfall24hMm: number | null;
     temperatureC: number | null;
   } | null>(null);
+
+  // AI 7-Day Weather & Disaster Forecast Modal state
+  const [isAiForecastModalOpen, setIsAiForecastModalOpen] = useState(false);
+  const [forecastModalVillage, setForecastModalVillage] = useState<Village | null>(null);
+
+  useEffect(() => {
+    const handlePlatformRefreshEvent = () => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    };
+    window.addEventListener('nivaran:refresh', handlePlatformRefreshEvent);
+    return () => window.removeEventListener('nivaran:refresh', handlePlatformRefreshEvent);
+  }, []);
 
   // OSRM route state for "Get directions"
   const [routeInfo, setRouteInfo] = useState<{
@@ -2623,21 +2639,25 @@ export const SimplifiedMapPage: React.FC = () => {
       }
 
       const popupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 6px; min-width: 220px; max-width: 280px; color: #0F172A;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 6px; min-width: 240px; max-width: 290px; color: #0F172A;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
             <span style="font-weight: 800; font-size: 13px; color: ${meta.colorHex};">📍 ${v.name}</span>
             <span style="background: ${meta.colorHex}; color: #FFFFFF; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 9999px;">${meta.zoneName}</span>
           </div>
-          ${v.nameMr ? `<div style="font-size: 11px; color: #475569; font-weight: 600; margin-bottom: 4px;">स्थानिक: ${v.nameMr}</div>` : ''}
           <div style="font-size: 10.5px; color: #64748B; margin-bottom: 6px;">${v.taluka} Taluka · ${v.district} District</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 6px; padding: 5px; margin-bottom: 6px; font-size: 10.5px;">
-            <div><strong>Risk Score:</strong> <span style="color: ${meta.colorHex}; font-weight: 700;">${meta.score100}/100</span></div>
+            <div><strong>Disaster Risk:</strong> <span style="color: ${meta.colorHex}; font-weight: 700;">${meta.score100}%</span></div>
             <div><strong>Elevation:</strong> ${v.elevationM}m</div>
             <div><strong>Slope:</strong> ${v.slopeDeg}°</div>
-            <div><strong>Families:</strong> ${v.households} HH</div>
+            <div><strong>Households:</strong> ${v.households} HH</div>
           </div>
           <div style="font-size: 9.5px; background: #FEF3C7; color: #92400E; padding: 3px 6px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
             <span>🔒</span><span>Pin Locked (Stays until Live GPS clicked)</span>
+          </div>
+          <div style="margin-bottom: 5px;">
+            <button id="btn-village-forecast" style="width: 100%; background: #0F766E; color: #FFFFFF; font-size: 10.5px; font-weight: 800; padding: 6px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <span>⚡ AI 7-Day Weather & Disaster Forecast</span>
+            </button>
           </div>
           <div style="display: flex; gap: 4px;">
             <button id="btn-village-shelter-dir" style="flex: 1; background: #008060; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 5px 6px; border-radius: 5px; border: none; cursor: pointer;">
@@ -2654,7 +2674,7 @@ export const SimplifiedMapPage: React.FC = () => {
         offset: 24,
         closeButton: true,
         closeOnClick: false,
-        maxWidth: '300px',
+        maxWidth: '310px',
       })
         .setLngLat([v.lng, v.lat])
         .setHTML(popupHtml)
@@ -2666,6 +2686,13 @@ export const SimplifiedMapPage: React.FC = () => {
       });
 
       setTimeout(() => {
+        const forecastBtn = document.getElementById('btn-village-forecast');
+        if (forecastBtn) {
+          forecastBtn.onclick = () => {
+            setForecastModalVillage(v);
+            setIsAiForecastModalOpen(true);
+          };
+        }
         const shelterBtn = document.getElementById('btn-village-shelter-dir');
         if (shelterBtn) {
           shelterBtn.onclick = () => {
@@ -4938,6 +4965,18 @@ export const SimplifiedMapPage: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
+                      onClick={() => {
+                        setForecastModalVillage(selectedVillage);
+                        setIsAiForecastModalOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer hover:scale-105"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <span>AI 7-Day Weather & Disaster Forecast</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() =>
                         void handleGetDirectionsToCoords(
                           selectedVillage.name,
@@ -5222,16 +5261,21 @@ export const SimplifiedMapPage: React.FC = () => {
       </div>
 
       {/* =====================================================================
-          ALL LOCATIONS DIRECTORY (SMALL TO SMALL VILLAGES & BIG TO BIG CITIES)
+          ALL 360+ MAHARASHTRA MONITORED VILLAGES & HABITATIONS DIRECTORY
           ===================================================================== */}
-      <div className="neu-raised p-4 space-y-3">
+      <div className="neu-raised p-4 sm:p-5 space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-bold text-[var(--text-primary)]">
-              Maharashtra Complete Cities, Talukas & Villages/Gaons Directory (Click Any to Map on GIS)
-            </h2>
-            <p className="text-xs text-[var(--text-secondary)]">
-              All 36 Districts, 350+ Talukas and Monitored Gaons/Villages (गाव / पाडा). Click any location pill to fly and map directly.
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-[var(--text-primary)]">
+                Maharashtra Monitored Habitations & Villages Directory (370+ Mapped Villages)
+              </h2>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-mono text-[10.5px] font-bold">
+                {villages.length} Villages Active
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+              All 36 Districts and Talukas across Maharashtra. Click any village to fly and lock on map, inspect elevation, rainfall, slope, disaster probability %, and launch AI 7-day weather predictions.
             </p>
           </div>
           <button
@@ -5247,7 +5291,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 });
               }
             }}
-            className="neu-btn px-3 py-1.5 text-xs font-bold flex items-center gap-1"
+            className="neu-btn px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.75} />
             <span>Reset Maharashtra Map View</span>
@@ -5256,36 +5300,52 @@ export const SimplifiedMapPage: React.FC = () => {
 
         {/* Division Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[var(--border)]">
-          <span className="text-[11px] font-bold text-slate-500 mr-1">विभाग / Division:</span>
-          {['All', 'Pune', 'Konkan', 'Nashik', 'Chhatrapati Sambhajinagar', 'Nagpur'].map((div) => (
+          <span className="text-[11px] font-bold text-slate-500 mr-1 uppercase tracking-wider">Division:</span>
+          {['All', 'Pune', 'Konkan', 'Nashik', 'Chhatrapati Sambhajinagar', 'Amravati', 'Nagpur'].map((div) => (
             <button
               key={div}
               type="button"
               onClick={() => setMhDirectoryDivision(div)}
-              className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all ${
+              className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
                 mhDirectoryDivision === div
                   ? 'bg-[#008060] text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              {div === 'All' ? 'सर्व महाराष्ट्र (All)' : div}
+              {div === 'All' ? `All Maharashtra (${villages.length})` : div}
             </button>
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto p-1.5 bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-slate-200/60 dark:border-slate-800">
-          {/* Monitored Disaster Villages */}
+        {/* Directory Container: Scrollable List of All Villages */}
+        <div className="flex flex-wrap gap-2 max-h-72 overflow-y-auto p-3 bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-slate-200/60 dark:border-slate-800 custom-scrollbar">
           {villages
             .filter((v) => {
-              if (mhDirectoryDivision === 'All') return true;
               if (mhDirectoryDivision === 'Pune') return ['Pune', 'Satara', 'Kolhapur', 'Sangli', 'Solapur'].includes(v.district);
-              if (mhDirectoryDivision === 'Konkan') return ['Raigad', 'Ratnagiri', 'Sindhudurg', 'Thane', 'Palghar', 'Mumbai'].includes(v.district);
+              if (mhDirectoryDivision === 'Konkan') return ['Raigad', 'Ratnagiri', 'Sindhudurg', 'Thane', 'Palghar', 'Mumbai City', 'Mumbai Suburban'].includes(v.district);
+              if (mhDirectoryDivision === 'Nashik') return ['Nashik', 'Ahmednagar', 'Dhule', 'Nandurbar', 'Jalgaon'].includes(v.district);
+              if (mhDirectoryDivision === 'Chhatrapati Sambhajinagar') return ['Chhatrapati Sambhajinagar', 'Jalna', 'Parbhani', 'Hingoli', 'Nanded', 'Beed', 'Latur', 'Dharashiv'].includes(v.district);
+              if (mhDirectoryDivision === 'Amravati') return ['Amravati', 'Akola', 'Yavatmal', 'Buldhana', 'Washim'].includes(v.district);
+              if (mhDirectoryDivision === 'Nagpur') return ['Nagpur', 'Wardha', 'Bhandara', 'Gondia', 'Chandrapur', 'Gadchiroli'].includes(v.district);
               return true;
+            })
+            .filter((v) => {
+              const q = (villageSearchTerm.trim() || searchQuery.trim()).toLowerCase();
+              if (!q) return true;
+              return (
+                v.name.toLowerCase().includes(q) ||
+                v.taluka.toLowerCase().includes(q) ||
+                v.district.toLowerCase().includes(q) ||
+                v.primaryHazard?.toLowerCase().includes(q)
+              );
             })
             .map((v) => {
               const hScore = weightedScore(v.hazardFactors, weights, v.verifiedReportsCount);
               const rLevel = classifyHazard(hScore);
               const rColor = getRiskColor(rLevel);
+              const isSelected = selectedVillage?.id === v.id;
+              const disasterPct = Math.round(hScore * 100);
+
               return (
                 <button
                   key={v.id}
@@ -5293,66 +5353,20 @@ export const SimplifiedMapPage: React.FC = () => {
                   onClick={() => {
                     handleSelectVillageFromList(v);
                   }}
-                  className="px-2.5 py-1 rounded-[8px] text-[11px] font-bold text-white flex items-center gap-1.5 shadow-2xs hover:scale-105 transition-all cursor-pointer"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 shadow-2xs hover:scale-105 transition-all cursor-pointer ${
+                    isSelected ? 'ring-2 ring-white ring-offset-2 scale-105' : ''
+                  }`}
                   style={{ backgroundColor: rColor }}
-                  title={`गाव: ${v.name} (${v.nameMr || ''}) - ${v.taluka}, ${v.district}`}
+                  title={`Village: ${v.name} (${v.taluka}, ${v.district}) · Elevation: ${v.elevationM}m · Rainfall: ${v.annualRainfallMm}mm · Disaster Risk: ${disasterPct}%`}
                 >
                   <span>🏡 {v.name}</span>
-                  <span className="opacity-85 font-normal text-[10px]">({v.taluka})</span>
+                  <span className="opacity-95 font-mono text-[10px] bg-black/30 px-1.5 py-0.5 rounded font-bold">
+                    {disasterPct}%
+                  </span>
+                  <span className="opacity-80 font-normal text-[10.5px]">({v.taluka})</span>
                 </button>
               );
             })}
-
-          {/* All Maharashtra Cities, Talukas & Villages */}
-          {ALL_MAHARASHTRA_PLACES
-            .filter((pl) => {
-              if (mhDirectoryDivision === 'All') return true;
-              const matchedDist = MAHARASHTRA_DISTRICTS_DATA.find((d) => d.name === pl.district);
-              return matchedDist?.division === mhDirectoryDivision;
-            })
-            .map((pl) => (
-              <button
-                key={pl.id}
-                type="button"
-                onClick={() => {
-                  const matchedVillage = villages.find(
-                    (v) => v.name.toLowerCase() === pl.name.split(' ')[0].toLowerCase()
-                  );
-                  if (matchedVillage) {
-                    handleSelectVillageFromList(matchedVillage);
-                  } else {
-                    flyToAndInspect(
-                      `${pl.nameMr} · ${pl.name} (${pl.district})`,
-                      pl.lat,
-                      pl.lng,
-                      pl.zoom
-                    );
-                    useAppStore.getState().showSingleToast({
-                      title: `📍 ${pl.nameMr}`,
-                      message: `${pl.category} in ${pl.district} mapped directly on GIS`,
-                      type: 'info',
-                    });
-                  }
-                }}
-                className={`neu-btn px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1 hover:scale-105 transition-all ${
-                  pl.category === 'District HQ'
-                    ? 'border-emerald-600/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold'
-                    : pl.category === 'Taluka / City'
-                    ? 'border-blue-400/50 bg-blue-50/50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300'
-                    : 'text-[var(--text-primary)] hover:text-[#0B8F80]'
-                }`}
-                title={`Click to fly to ${pl.name} (${pl.nameMr})`}
-              >
-                <span>
-                  {pl.category === 'District HQ'
-                    ? '📍'
-                    : pl.category === 'Taluka / City'
-                    ? '🏛️'
-                    : '🏡'}
-                </span>
-                <span>{pl.nameMr || pl.name}</span>
-              </button>
-            ))}
         </div>
       </div>
 
@@ -5366,6 +5380,16 @@ export const SimplifiedMapPage: React.FC = () => {
         isOpen={isProviderModalOpen}
         onClose={() => setIsProviderModalOpen(false)}
         onProviderChanged={handleProviderChanged}
+      />
+
+      {/* AI 7-Day Weather & Disaster Forecast Modal */}
+      <VillageAiDisasterForecastModal
+        village={forecastModalVillage}
+        isOpen={isAiForecastModalOpen}
+        onClose={() => setIsAiForecastModalOpen(false)}
+        onNavigateToShelter={(v) => {
+          void handleGetDirectionsToCoords(`${v.name} (${v.district})`, v.lat, v.lng);
+        }}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import {
   Village,
 } from '../types';
 import { computeLedgerHash } from '../utils/scoring';
+import { MASTER_MAHARASHTRA_VILLAGES } from './maharashtraMasterVillages';
 
 const BASE_25_VILLAGES: Village[] = [
   {
@@ -1579,10 +1580,24 @@ const EXPANDED_20_VILLAGES: Village[] = [
   },
 ];
 
-export const INITIAL_VILLAGES: Village[] = [
+const BASE_COMBINED_VILLAGES: Village[] = [
   ...BASE_25_VILLAGES,
   ...EXTRA_15_VILLAGES,
   ...EXPANDED_20_VILLAGES,
+];
+
+const existingVillageNames = new Set(BASE_COMBINED_VILLAGES.map((v) => v.name.toLowerCase()));
+
+const ADDITIONAL_MASTER_VILLAGES: Village[] = MASTER_MAHARASHTRA_VILLAGES.filter(
+  (mv) => !existingVillageNames.has(mv.name.toLowerCase())
+).map((mv, idx) => ({
+  ...mv,
+  id: `v-mstr-${String(idx + 1).padStart(3, '0')}`,
+}));
+
+export const INITIAL_VILLAGES: Village[] = [
+  ...BASE_COMBINED_VILLAGES,
+  ...ADDITIONAL_MASTER_VILLAGES,
 ].map((v) => ({ ...v, state: v.state || 'Maharashtra' }));
 
 export const INITIAL_RELOCATION_SITES: RelocationSite[] = [

@@ -388,14 +388,10 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
   };
 
   const getItemLabel = (it: NavItemDef): string => {
-    if (language === 'mr') return it.labelMr || it.labelHi || it.labelEn;
-    if (language === 'hi') return it.labelHi || it.labelEn;
     return it.labelEn;
   };
 
   const getGroupTitle = (grp: NavGroupDef): string => {
-    if (language === 'mr') return grp.titleMr || grp.titleHi || grp.titleEn;
-    if (language === 'hi') return grp.titleHi || grp.titleEn;
     return grp.titleEn;
   };
 
@@ -415,11 +411,7 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#16A078] animate-pulse" />
             <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300">
-              {language === 'mr'
-                ? '१७ नियंत्रण कक्ष विभाग'
-                : language === 'hi'
-                ? '१७ नियंत्रण कक्ष मॉड्यूल'
-                : '17 Operational Modules'}
+              Operational Command Modules
             </span>
           </div>
         ) : (
@@ -452,13 +444,13 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
         </button>
       </div>
 
-      {/* Nav Items Container (Scrollable) */}
+      {/* Nav Items Container (Scrollable Full Page Height) */}
       <nav
         aria-label="Enterprise GIS Navigation Panel"
-        className="flex-1 overflow-y-auto px-2 py-3 space-y-4 no-scrollbar"
+        className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 custom-scrollbar"
       >
         {filteredGroups.map((grp) => (
-          <div key={grp.groupId} className="space-y-1">
+          <div key={grp.groupId} className="space-y-1.5">
             {/* Category Section Heading */}
             {!isCollapsed && (
               <div className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
@@ -466,8 +458,8 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
               </div>
             )}
 
-            {/* Group Navigation Links */}
-            <div className="space-y-0.5">
+            {/* Group Navigation Links (Neumorphic Style, No Numbers) */}
+            <div className="space-y-1">
               {grp.items.map((it) => {
                 const Icon = it.icon;
                 const label = getItemLabel(it);
@@ -484,47 +476,36 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
                     onClick={() => {
                       if (mobileOpen) onCloseMobile();
                     }}
-                    title={isCollapsed ? `${it.num < 10 ? '0' : ''}${it.num}. ${label}` : undefined}
-                    className={`group relative flex items-center rounded-xl text-xs transition-all duration-200 font-medium active:scale-[0.98] ${
+                    title={isCollapsed ? label : undefined}
+                    className={`group relative flex items-center rounded-xl text-xs transition-all duration-200 font-medium ${
                       isCollapsed
                         ? 'justify-center py-2.5 px-1'
-                        : 'gap-2.5 px-3 py-2'
+                        : 'gap-3 px-3 py-2.5'
                     } ${
                       isActive
-                        ? 'bg-[#16A078] text-white font-bold shadow-xs'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46] hover:text-slate-900 dark:hover:text-white'
+                        ? 'neu-pressed bg-emerald-50/80 dark:bg-[#132337] text-[#16A078] dark:text-[#10B981] font-bold border border-[#16A078]/30 shadow-inner'
+                        : 'neu-flat hover:neu-raised text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/60'
                     }`}
                   >
                     {/* Active Indicator Bar on Left Edge */}
                     {isActive && (
-                      <span className="absolute left-1 top-2 bottom-2 w-1 rounded-full bg-white shadow-xs" />
+                      <span className="absolute left-1 top-2 bottom-2 w-1 rounded-full bg-[#16A078] shadow-xs" />
                     )}
-
-                    {/* Item Number Pill */}
-                    {!isCollapsed ? (
-                      <span
-                        className={`font-mono text-[9.5px] font-bold px-1.5 py-0.2 rounded shrink-0 transition-colors ${
-                          isActive
-                            ? 'bg-black/20 text-white'
-                            : 'bg-slate-100 dark:bg-[#172F46] text-slate-600 dark:text-slate-300'
-                        }`}
-                      >
-                        {it.num < 10 ? `0${it.num}` : it.num}
-                      </span>
-                    ) : null}
 
                     {/* Icon with Hover Micro-motion */}
                     <Icon
                       className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                        isActive ? 'text-white' : 'text-[#16A078]'
+                        isActive
+                          ? 'text-[#16A078] dark:text-[#10B981]'
+                          : 'text-slate-500 dark:text-slate-400 group-hover:text-[#16A078]'
                       }`}
-                      strokeWidth={2}
+                      strokeWidth={isActive ? 2.2 : 1.8}
                     />
 
-                    {/* Label */}
+                    {/* Label (English Only) */}
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
-                        <div className="truncate leading-tight text-[12.5px]">{label}</div>
+                        <div className="truncate leading-tight text-[12.5px] font-semibold">{label}</div>
                       </div>
                     )}
 
@@ -537,7 +518,7 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
                             : it.badgeKey === 'incidents'
                             ? 'bg-[#EA580C] text-white'
                             : isActive
-                            ? 'bg-white text-[#16A078]'
+                            ? 'bg-[#16A078] text-white'
                             : 'bg-slate-200 dark:bg-[#233C57] text-slate-800 dark:text-slate-200'
                         }`}
                       >
@@ -557,10 +538,10 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
         {!isCollapsed ? (
           <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between font-mono">
             <span>NDMA · SDMA</span>
-            <span className="font-bold text-[#16A078]">NIVARAN 2.0</span>
+            <span className="font-bold text-[#16A078]">NIVARAN</span>
           </div>
         ) : (
-          <div className="text-[9px] font-mono font-bold text-[#16A078]">2.0</div>
+          <div className="text-[9px] font-mono font-bold text-[#16A078]">NIVARAN</div>
         )}
       </div>
     </div>

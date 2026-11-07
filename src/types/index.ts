@@ -25,7 +25,7 @@ export type TextSize = '100' | '115' | '130';
 
 export type Language = 'en' | 'hi' | 'mr';
 
-export type HazardType = 'landslide' | 'flood' | 'erosion' | 'cloudburst';
+export type HazardType = 'landslide' | 'flood' | 'erosion' | 'cloudburst' | 'cyclone';
 
 export type RiskLevel = 'Immediate' | 'Short-term' | 'Medium-term' | 'Safe';
 
@@ -170,7 +170,7 @@ export interface Village {
   nameMr: string;
   nameLocal?: string;
   state?: string;
-  district: 'Raigad' | 'Satara' | 'Pune' | 'Ratnagiri' | 'Kolhapur' | 'Sindhudurg' | 'Thane' | 'Palghar' | 'Nashik';
+  district: string;
   taluka: string;
   block?: string;
   lat: number;
@@ -201,7 +201,7 @@ export interface RelocationSite {
   name: string;
   nameHi: string;
   nameMr: string;
-  district: 'Raigad' | 'Satara' | 'Pune' | 'Ratnagiri' | 'Kolhapur' | 'Sindhudurg' | 'Thane' | 'Palghar' | 'Nashik';
+  district: string;
   taluka: string;
   block?: string;
   lat: number;
@@ -241,7 +241,7 @@ export interface ReliefCamp {
   id: string;
   name: string;
   shelterType?: ShelterType;
-  district: 'Raigad' | 'Satara' | 'Pune' | 'Ratnagiri' | 'Kolhapur' | 'Sindhudurg' | 'Thane' | 'Palghar' | 'Nashik';
+  district: string;
   taluka: string;
   block?: string;
   lat: number;
@@ -289,7 +289,7 @@ export interface IncidentItem {
   hazardType: HazardType;
   severity: 'Critical' | 'High' | 'Moderate';
   status: IncidentStatus;
-  district: 'Raigad' | 'Satara' | 'Pune' | 'Ratnagiri' | 'Kolhapur' | 'Sindhudurg' | 'Thane' | 'Palghar' | 'Nashik';
+  district: string;
   villageId?: string;
   villageName: string;
   lat: number;

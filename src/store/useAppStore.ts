@@ -350,8 +350,8 @@ function getInitialSessionFromToken(): UserSession | null {
   } catch {
     // ignore
   }
-  // Default to State Disaster Authority session so the GIS map and command center load instantly out of the box
-  return ORGANISATION_PRESETS.state;
+  // Open by login page directly when unauthenticated
+  return null;
 }
 
 export interface ToastMessage {

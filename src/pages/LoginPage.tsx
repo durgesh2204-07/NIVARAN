@@ -365,6 +365,27 @@ export const LoginPage: React.FC = () => {
           <p className="text-sm sm:text-base text-slate-500 max-w-2xl mx-auto leading-relaxed">
             Connect apex disaster authorities, district collectors, field response battalions, telemetry officers, volunteers, and citizens for unified action.
           </p>
+
+          {/* Instant 1-Click Launch Action for Demo Evaluators */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setUser(ORGANISATION_PRESETS.state, true);
+                addToast({
+                  title: 'Demo Access Granted',
+                  message: 'Entering GIS Command Center as Maharashtra SDMA Commander',
+                  type: 'success',
+                });
+                navigate('/map');
+              }}
+              className="px-6 py-3 rounded-full text-xs sm:text-sm font-bold bg-[#008060] hover:bg-[#006e52] text-white shadow-lg hover:shadow-xl transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
+            >
+              <Compass className="w-4 h-4 text-emerald-200" />
+              <span>Launch Live GIS Command Center (Instant Access)</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Authority Category Filter Tabs */}

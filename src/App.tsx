@@ -10,7 +10,6 @@ import { RefreshCw, ShieldAlert } from 'lucide-react';
 import { useAppStore } from './store/useAppStore';
 import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/LoginPage';
-import { GlobalDomTranslator } from './components/GlobalDomTranslator';
 import { AppErrorBoundary, RouteErrorBoundary } from './resilience/ErrorBoundaries';
 import { initGlobalObservability, onChunkReloadPrompt } from './resilience/reporter';
 import { LoadingSkeletonState } from './components/StateViews';
@@ -200,8 +199,6 @@ export const App: React.FC = () => {
   return (
     <AppErrorBoundary>
       <BrowserRouter basename={baseUrl}>
-        <GlobalDomTranslator />
-
         {chunkNeedsReload && (
           <div
             role="status"
@@ -227,7 +224,11 @@ export const App: React.FC = () => {
           }
         >
           <Routes>
-            <Route path="/" element={<Navigate to="/map" replace />} />
+            {/* Directly open login page on initial visit */}
+            <Route
+              path="/"
+              element={user ? <Navigate to="/map" replace /> : <LoginPage />}
+            />
             <Route path="/login" element={<LoginPage />} />
 
             <Route

@@ -144,7 +144,7 @@ export const KebabMenu: React.FC = () => {
     setIsOpen(false);
     addToast({
       title: 'NIVARAN Operational Manual',
-      message: 'SOP NDMA / SDMA Multi-Hazard Relocation Decision System v2.0 active.',
+      message: 'SOP NDMA / SDMA Multi-Hazard Relocation Decision System active.',
       type: 'info',
     });
   };

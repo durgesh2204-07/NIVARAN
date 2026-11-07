@@ -571,8 +571,25 @@ export const AppLayout: React.FC = () => {
   const setSelectedVillageId = useAppStore((s) => s.setSelectedVillageId);
   const setCommandPaletteOpen = useAppStore((s) => s.setCommandPaletteOpen);
   const addToast = useAppStore((s) => s.addToast);
+  const syncAllDataSources = useAppStore((s) => s.syncAllDataSources);
 
   const activeAlertZones = useAppStore((s) => s.activeAlertZones);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handlePlatformRefresh = () => {
+    setIsRefreshing(true);
+    window.dispatchEvent(new CustomEvent('nivaran:refresh'));
+    syncAllDataSources();
+    addToast({
+      title: 'Platform Refreshed',
+      message: 'Live GIS telemetry, GPS coordinates, and AI forecast models synchronized.',
+      type: 'success',
+    });
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 800);
+  };
 
   const [modulesDropdownOpen, setModulesDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -853,29 +870,22 @@ export const AppLayout: React.FC = () => {
               >
                 {ROLE_OPTIONS.map((opt) => (
                   <option key={opt.id} value={opt.id} className="text-slate-900 bg-white dark:bg-[#172F46] dark:text-white">
-                    {language === 'mr' ? opt.mr : language === 'hi' ? opt.hi : opt.en}
+                    {opt.en}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Language Switcher */}
-            <div className="hidden 2xl:flex items-center bg-slate-50 dark:bg-[#172F46] border border-slate-200 dark:border-[#233C57] rounded-lg p-0.5 gap-0.5 shadow-2xs">
-              {(['en', 'hi', 'mr'] as Language[]).map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setLanguage(lang)}
-                  className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all ${
-                    language === lang
-                      ? 'bg-[#008060] text-white shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {lang === 'en' ? 'EN' : lang === 'hi' ? 'हिन्दी' : 'मराठी'}
-                </button>
-              ))}
-            </div>
+            {/* Global Refresh Button */}
+            <button
+              type="button"
+              onClick={handlePlatformRefresh}
+              className="neu-btn px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-[#172F46] border border-slate-200 dark:border-[#233C57] text-slate-700 dark:text-slate-200 hover:text-[#008060] text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+              title="Refresh live telemetry, GIS map markers & predictions"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#008060] ${isRefreshing ? 'animate-spin' : ''}`} strokeWidth={2} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
 
             {/* Dark / Light Theme Toggle */}
             <button

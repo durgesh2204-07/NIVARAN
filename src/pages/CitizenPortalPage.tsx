@@ -84,6 +84,19 @@ const DOS_AND_DONTS: Record<
       'Do not dump debris into storm drainage channels.',
     ],
   },
+  cyclone: {
+    title: 'Severe Coastal Cyclone & Gale Wind Safety',
+    dos: [
+      'Secure loose roof sheets, solar panels, and outdoor items before gale force winds arrive.',
+      'Stay indoors away from glass windows and shelter in the designated concrete cyclone refuge.',
+      'Keep battery-powered radio tuned to official AIR/Doordarshan and Sachet CAP broadcasts.',
+    ],
+    donts: [
+      'Do not venture near the sea shore, beaches, or open jetties during high-tide surge.',
+      'Do not shelter under tall coconut trees, hoardings, or metal transmission towers.',
+      'Do not spread unverified social media rumours; rely on IMD cyclone bulletins.',
+    ],
+  },
 };
 
 export const CitizenPortalPage: React.FC = () => {

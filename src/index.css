@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    font-family: 'IBM Plex Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg);
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
@@ -22,15 +22,15 @@
   h4,
   h5,
   h6 {
-    font-family: 'IBM Plex Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
-    letter-spacing: -0.01em;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.015em;
   }
 
   code,
   pre,
   .font-mono,
   .tabular-nums {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
 
@@ -39,6 +39,22 @@
     border-collapse: collapse;
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Custom Sleek Scrollbar for Full-Height Scrolling Panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
 }
 
 /* Harmonize module cards across pages with the neumorphic surface */

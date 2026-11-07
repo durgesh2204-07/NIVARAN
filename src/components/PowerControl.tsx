@@ -215,7 +215,7 @@ export const PowerControl: React.FC = () => {
                       isBackendHealthy ? 'bg-emerald-500' : 'bg-amber-500'
                     }`}
                   />
-                  <span>{isBackendHealthy ? 'HEALTHY (v2.0.0)' : 'STANDBY'}</span>
+                  <span>{isBackendHealthy ? 'HEALTHY (ONLINE)' : 'STANDBY'}</span>
                 </div>
               </div>
 
