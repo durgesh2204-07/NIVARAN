@@ -121,7 +121,7 @@ const STAFF_ROLES: UserRole[] = [
 
 const getDefaultRouteForRole = (role?: UserRole): string => {
   if (!role) return '/login';
-  return '/map';
+  return '/dashboard';
 };
 
 const AccessDeniedScreen: React.FC<{ fallbackRoute: string }> = ({ fallbackRoute }) => {
@@ -148,7 +148,7 @@ const AccessDeniedScreen: React.FC<{ fallbackRoute: string }> = ({ fallbackRoute
             onClick={() => navigate(fallbackRoute)}
             className="neu-btn-primary px-4 py-2 text-xs font-semibold"
           >
-            Return to Map
+            Return to Dashboard
           </button>
         </div>
       </div>
@@ -224,10 +224,10 @@ export const App: React.FC = () => {
           }
         >
           <Routes>
-            {/* Directly open login page on initial visit */}
+            {/* Directly open login page on initial visit, or overview dashboard if logged in */}
             <Route
               path="/"
-              element={user ? <Navigate to="/map" replace /> : <LoginPage />}
+              element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
             />
             <Route path="/login" element={<LoginPage />} />
 

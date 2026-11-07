@@ -236,7 +236,7 @@ export const LoginPage: React.FC = () => {
         });
 
         setIsLoading(false);
-        navigate('/map');
+        navigate('/dashboard');
         return;
       } else if (response.status === 429) {
         const errorData = await response.json().catch(() => ({}));
@@ -272,7 +272,7 @@ export const LoginPage: React.FC = () => {
     });
 
     setIsLoading(false);
-    navigate('/map');
+    navigate('/dashboard');
   };
 
   const handleGuestBypass = () => {
@@ -287,10 +287,10 @@ export const LoginPage: React.FC = () => {
     );
     addToast({
       title: 'Guest Access Active',
-      message: 'Viewing public disaster command map and emergency shelters.',
+      message: 'Viewing public disaster command dashboard and emergency shelters.',
       type: 'info',
     });
-    navigate('/map');
+    navigate('/dashboard');
   };
 
   const filteredAuthorities = ALL_AUTHORITIES.filter((a) => {
@@ -374,15 +374,15 @@ export const LoginPage: React.FC = () => {
                 setUser(ORGANISATION_PRESETS.state, true);
                 addToast({
                   title: 'Demo Access Granted',
-                  message: 'Entering GIS Command Center as Maharashtra SDMA Commander',
+                  message: 'Entering Overview Dashboard as Maharashtra SDMA Commander',
                   type: 'success',
                 });
-                navigate('/map');
+                navigate('/dashboard');
               }}
               className="px-6 py-3 rounded-full text-xs sm:text-sm font-bold bg-[#008060] hover:bg-[#006e52] text-white shadow-lg hover:shadow-xl transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
             >
               <Compass className="w-4 h-4 text-emerald-200" />
-              <span>Launch Live GIS Command Center (Instant Access)</span>
+              <span>Launch Overview Dashboard (Instant Access)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

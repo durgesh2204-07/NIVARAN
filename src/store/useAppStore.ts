@@ -1083,7 +1083,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   climateHorizon: 'today',
   extraRainfallMm: 100,
   divideBySafeCapacity: false,
-  selectedVillageId: 'v-01',
+  selectedVillageId: null,
   explainModalPayload: null,
   customOrderIds: [],
   manualSiteOverrides: {},
