@@ -79,6 +79,8 @@ app.include_router(regions.router, prefix=settings.API_V1_STR)
 app.include_router(climate.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
+@app.get("/api")
+@app.get("/api/")
 def root_status(request: Request):
     client_ip = get_client_ip(request)
     return {
