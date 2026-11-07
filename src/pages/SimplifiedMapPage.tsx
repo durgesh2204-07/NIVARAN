@@ -71,6 +71,8 @@ import { GisCommandDecisionDeck } from '../components/GisCommandDecisionDeck';
 import {
   getStoredMapProvider,
   getStreetBasemapConfig,
+  getTopoBasemapConfig,
+  getDarkBasemapConfig,
   MapProviderType,
 } from '../gis/mapTileConfig';
 import { MapProviderSettingsModal } from '../components/MapProviderSettingsModal';
@@ -823,10 +825,20 @@ export const SimplifiedMapPage: React.FC = () => {
   const handleProviderChanged = (newProvider: MapProviderType) => {
     setActiveProvider(newProvider);
     if (mapRef.current && mapRef.current.isStyleLoaded()) {
-      const src = mapRef.current.getSource('osm_street') as maplibregl.RasterTileSource;
-      if (src && typeof src.setTiles === 'function') {
+      const streetSrc = mapRef.current.getSource('osm_street') as maplibregl.RasterTileSource;
+      if (streetSrc && typeof streetSrc.setTiles === 'function') {
         const config = getStreetBasemapConfig(newProvider);
-        src.setTiles(config.tiles);
+        streetSrc.setTiles(config.tiles);
+      }
+      const topoSrc = mapRef.current.getSource('open_topo') as maplibregl.RasterTileSource;
+      if (topoSrc && typeof topoSrc.setTiles === 'function') {
+        const topoConfig = getTopoBasemapConfig(newProvider);
+        topoSrc.setTiles(topoConfig.tiles);
+      }
+      const darkSrc = mapRef.current.getSource('carto_dark') as maplibregl.RasterTileSource;
+      if (darkSrc && typeof darkSrc.setTiles === 'function') {
+        const darkConfig = getDarkBasemapConfig(newProvider);
+        darkSrc.setTiles(darkConfig.tiles);
       }
     }
   };
@@ -878,20 +890,13 @@ export const SimplifiedMapPage: React.FC = () => {
           },
           open_topo: {
             type: 'raster',
-            tiles: [
-              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-            ],
+            tiles: getTopoBasemapConfig(getStoredMapProvider()).tiles,
             tileSize: 256,
             maxzoom: 19,
           },
           carto_dark: {
             type: 'raster',
-            tiles: [
-              'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-              'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-              'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-              'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-            ],
+            tiles: getDarkBasemapConfig(getStoredMapProvider()).tiles,
             tileSize: 256,
             maxzoom: 19,
           },

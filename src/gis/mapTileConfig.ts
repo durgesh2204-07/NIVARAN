@@ -160,16 +160,51 @@ export function getStreetBasemapConfig(
   };
 }
 
-export function getDarkBasemapConfig(): { tiles: string[]; attribution: string; label: string } {
+export function getDarkBasemapConfig(
+  provider: MapProviderType = getStoredMapProvider(),
+  overrideKey?: string
+): { tiles: string[]; attribution: string; label: string; requiresKey: boolean } {
+  const activeKey = overrideKey !== undefined ? overrideKey : getStoredProviderKey(provider);
+
+  if (provider === 'mapbox' && activeKey) {
+    return {
+      tiles: [
+        `https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=${encodeURIComponent(
+          activeKey
+        )}`,
+      ],
+      attribution: '© Mapbox © OpenStreetMap contributors · Dark Matter v11',
+      label: 'Mapbox Dark v11 (High-Resolution Dark GIS)',
+      requiresKey: true,
+    };
+  }
+
+  if (provider === 'maptiler' && activeKey) {
+    return {
+      tiles: [
+        `https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=${encodeURIComponent(
+          activeKey
+        )}`,
+      ],
+      attribution: '© MapTiler © OpenStreetMap contributors · DataViz Dark',
+      label: 'MapTiler Dark GIS',
+      requiresKey: true,
+    };
+  }
+
+  // DEFAULT / FREE: CartoDB Dark Matter with resilient multi-CDN mirrors & Esri Dark Canvas fallback
   return {
     tiles: [
+      'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
       'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
       'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
       'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
       'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     ],
-    attribution: 'CartoDB Dark Matter · High-Contrast Dark GIS Basemap',
+    attribution: 'CartoDB Dark Matter · High-Contrast Dark GIS Basemap (100% Free · No Key Required)',
     label: 'Dark GIS Mission Control Map',
+    requiresKey: false,
   };
 }
 
@@ -181,6 +216,7 @@ export function getSatelliteBasemapConfig(): {
 } {
   return {
     imageryTiles: [
+      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     ],
     roadsOverlay: [
@@ -193,13 +229,72 @@ export function getSatelliteBasemapConfig(): {
   };
 }
 
-export function getTopoBasemapConfig(): { tiles: string[]; attribution: string; label: string } {
+export function getTopoBasemapConfig(
+  provider: MapProviderType = getStoredMapProvider(),
+  overrideKey?: string
+): { tiles: string[]; attribution: string; label: string; requiresKey: boolean } {
+  const activeKey = overrideKey !== undefined ? overrideKey : getStoredProviderKey(provider);
+
+  if (provider === 'mapbox' && activeKey) {
+    return {
+      tiles: [
+        `https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=${encodeURIComponent(
+          activeKey
+        )}`,
+      ],
+      attribution: '© Mapbox © OpenStreetMap contributors · Outdoors Topo v12',
+      label: 'Mapbox Outdoors Topographic v12',
+      requiresKey: true,
+    };
+  }
+
+  if (provider === 'maptiler' && activeKey) {
+    return {
+      tiles: [
+        `https://api.maptiler.com/maps/topo-v2/256/{z}/{x}/{y}.png?key=${encodeURIComponent(
+          activeKey
+        )}`,
+      ],
+      attribution: '© MapTiler © OpenStreetMap contributors · Topo v2',
+      label: 'MapTiler Topographic v2',
+      requiresKey: true,
+    };
+  }
+
+  if (provider === 'google') {
+    const tiles = activeKey
+      ? [
+          `https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=${encodeURIComponent(activeKey)}`,
+          `https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=${encodeURIComponent(activeKey)}`,
+          `https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=${encodeURIComponent(activeKey)}`,
+          `https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}&key=${encodeURIComponent(activeKey)}`,
+        ]
+      : [
+          'https://mt0.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+          'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+          'https://mt2.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+          'https://mt3.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+        ];
+    return {
+      tiles,
+      attribution: '© Google Maps · Terrain & Elevation Contours',
+      label: 'Google Terrain & Topo',
+      requiresKey: true,
+    };
+  }
+
+  // DEFAULT / FREE: Esri World Topo Map with OpenTopoMap fallback
   return {
     tiles: [
+      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+      'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
     ],
-    attribution: 'Esri World Topographic Map · Zero API Key Required',
+    attribution: 'Esri World Topographic Map · OpenTopoMap (100% Free · No Key Required)',
     label: 'Terrain & Contours',
+    requiresKey: false,
   };
 }
 

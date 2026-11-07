@@ -49,6 +49,12 @@ import {
   Village,
 } from '../types';
 import {
+  getStreetBasemapConfig,
+  getSatelliteBasemapConfig,
+  getTopoBasemapConfig,
+  getDarkBasemapConfig,
+} from './mapTileConfig';
+import {
   buildVillageExplainPayload,
   carryingCapacity,
   elevationProfile,
@@ -123,45 +129,19 @@ export const RIVER_PATHS: { name: string; coords: [number, number][] }[] = [
   },
 ];
 
-// Free Open GIS Basemaps: OpenStreetMap Standard + Esri Imagery, Topo, and Dark Canvas (Zero API Key Required)
+// Resilient Multi-Provider GIS Basemaps with API key support & automatic zero-key fallback
 const BASEMAP_RASTER_URLS: Record<
   BasemapStyle,
   { tiles: string[]; attribution: string; label: string }
 > = {
-  osm: {
-    tiles: [
-      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    ],
-    attribution: '© OpenStreetMap contributors · Zero API Key Required',
-    label: 'OpenStreetMap Live GPS',
-  },
+  osm: getStreetBasemapConfig(),
   satellite: {
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    ],
-    attribution: 'Esri World Imagery · AWS Terrarium 3D DEM',
+    tiles: getSatelliteBasemapConfig().imageryTiles,
+    attribution: getSatelliteBasemapConfig().attribution,
     label: '3D Satellite + Streets',
   },
-  terrain: {
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-    ],
-    attribution: 'Esri World Topographic Map · Zero API Key Required',
-    label: 'Terrain & Contours',
-  },
-  dark: {
-    tiles: [
-      'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-    ],
-    attribution: 'CartoDB Dark Matter · High-Contrast Dark GIS Basemap',
-    label: 'Dark GIS Control Map',
-  },
+  terrain: getTopoBasemapConfig(),
+  dark: getDarkBasemapConfig(),
 };
 
 export type ZoneCategory = 'RED' | 'ORANGE' | 'GREEN';
