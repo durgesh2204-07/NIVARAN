@@ -152,12 +152,6 @@ function getInitialAdvancedTheme(): NivaranTheme {
 }
 
 function getInitialLanguage(): Language {
-  try {
-    const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
-    if (saved === 'en' || saved === 'hi' || saved === 'mr') return saved;
-  } catch {
-    // ignore
-  }
   return 'en';
 }
 
@@ -1196,13 +1190,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ user: null, idleWarningOpen: false, offlineQueue: [] });
   },
 
-  setLanguage: (language) => {
+  setLanguage: (_language) => {
     try {
-      window.localStorage.setItem(LANG_STORAGE_KEY, language);
+      window.localStorage.setItem(LANG_STORAGE_KEY, 'en');
     } catch {
       // ignore
     }
-    set({ language });
+    set({ language: 'en' });
   },
 
   setTheme: (theme: NivaranTheme) => {

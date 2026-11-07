@@ -186,16 +186,39 @@ export const LoginPage: React.FC = () => {
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Security Rate Limiting & Error Handling State
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const authBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = `NIVARAN — National Disaster Early Warning & Resilience Platform`;
   }, []);
 
+  // Countdown timer for security rate-limit lockout
+  useEffect(() => {
+    if (lockoutRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setLockoutRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setFailedAttempts(0);
+          setAuthError(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockoutRemaining]);
+
   const handleSelectAuthority = (auth: AuthorityConfig, scrollToAuth = false) => {
     setSelectedAuthorityId(auth.id);
     setEmailOrPhone(auth.defaultEmail);
     setPassword(auth.defaultPass);
+    setAuthError(null);
 
     if (scrollToAuth && authBoxRef.current) {
       authBoxRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -204,14 +227,23 @@ export const LoginPage: React.FC = () => {
 
   const handleSignIn = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (lockoutRemaining > 0) return;
+
+    const trimmedEmail = emailOrPhone.trim();
+    if (!trimmedEmail || !password) {
+      setAuthError('Please enter both your official identifier and password.');
+      return;
+    }
+
     setIsLoading(true);
+    setAuthError(null);
 
     try {
       // Connect to backend auth gateway
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailOrPhone.trim(), password }),
+        body: JSON.stringify({ email: trimmedEmail, password }),
       });
 
       const ct = response.headers.get('content-type') || '';
@@ -222,7 +254,7 @@ export const LoginPage: React.FC = () => {
         setUser(
           {
             ...preset,
-            emailOrPhone: data.user?.email || emailOrPhone.trim(),
+            emailOrPhone: data.user?.email || trimmedEmail,
             name: data.user?.name || selectedAuthority.officialName,
             unitName: data.user?.department || selectedAuthority.department,
           },
@@ -235,12 +267,15 @@ export const LoginPage: React.FC = () => {
           type: 'success',
         });
 
+        setFailedAttempts(0);
         setIsLoading(false);
         navigate('/dashboard');
         return;
       } else if (response.status === 429) {
         const errorData = await response.json().catch(() => ({}));
-        const retrySecs = errorData.retry_after_seconds || response.headers.get('Retry-After') || 30;
+        const retrySecs = Number(errorData.retry_after_seconds || response.headers.get('Retry-After') || 30);
+        setLockoutRemaining(retrySecs);
+        setAuthError(`Rate Limit Exceeded: Too many sign-in attempts. Please wait ${retrySecs} seconds.`);
         addToast({
           title: 'Rate Limit Security Enforced',
           message: `Too many sign-in attempts. Please wait ${retrySecs} seconds before trying again.`,
@@ -248,49 +283,75 @@ export const LoginPage: React.FC = () => {
         });
         setIsLoading(false);
         return;
+      } else if (response.status === 401 || response.status === 400 || response.status === 403) {
+        // Backend actively rejected credentials
+        const newAttempts = failedAttempts + 1;
+        setFailedAttempts(newAttempts);
+        if (newAttempts >= 5) {
+          setLockoutRemaining(30);
+          setAuthError('Security Alert: 5 consecutive failed login attempts. Terminal locked for 30 seconds.');
+        } else {
+          setAuthError(`Invalid credentials. ${5 - newAttempts} attempt(s) remaining before security lockout.`);
+        }
+        addToast({
+          title: 'Authentication Denied',
+          message: 'Invalid official identifier or password. Access is restricted to authorized personnel.',
+          type: 'critical',
+        });
+        setIsLoading(false);
+        return;
       }
-    } catch (err) {
-      // Offline fallback handling
+    } catch {
+      // Offline fallback: strictly verify credentials against authorized presets
     }
 
-    // Local resilient sign-in
-    const preset = ORGANISATION_PRESETS[selectedAuthority.id] || ORGANISATION_PRESETS.state;
-    setUser(
-      {
-        ...preset,
-        emailOrPhone: emailOrPhone.trim() || selectedAuthority.defaultEmail,
-        name: selectedAuthority.officialName,
-        unitName: selectedAuthority.department,
-      },
-      keepSignedIn
+    // Strict local verification: Check if credentials match any authorized authority
+    const matchingAuth = ALL_AUTHORITIES.find(
+      (a) =>
+        a.defaultEmail.toLowerCase() === trimmedEmail.toLowerCase() &&
+        a.defaultPass === password
     );
 
-    addToast({
-      title: 'Portal Access Granted',
-      message: `${selectedAuthority.title} — ${selectedAuthority.officialName}`,
-      type: 'success',
-    });
+    if (matchingAuth) {
+      const preset = ORGANISATION_PRESETS[matchingAuth.id] || ORGANISATION_PRESETS.state;
+      setUser(
+        {
+          ...preset,
+          emailOrPhone: trimmedEmail,
+          name: matchingAuth.officialName,
+          unitName: matchingAuth.department,
+        },
+        keepSignedIn
+      );
 
+      addToast({
+        title: 'Security Verified · Access Granted',
+        message: `${matchingAuth.title} — ${matchingAuth.officialName}`,
+        type: 'success',
+      });
+
+      setFailedAttempts(0);
+      setIsLoading(false);
+      navigate('/dashboard');
+      return;
+    }
+
+    // Invalid credentials entered! Strictly reject and enforce lockout counter
+    const newAttempts = failedAttempts + 1;
+    setFailedAttempts(newAttempts);
+    if (newAttempts >= 5) {
+      setLockoutRemaining(30);
+      setAuthError('Security Lockout: 5 consecutive failed attempts. Terminal locked for 30 seconds.');
+    } else {
+      setAuthError(`Access Denied: Invalid identifier or password. (${5 - newAttempts} attempts left)`);
+    }
+
+    addToast({
+      title: 'Authentication Denied',
+      message: 'Invalid credentials. Access to NIVARAN Disaster Platform is restricted.',
+      type: 'critical',
+    });
     setIsLoading(false);
-    navigate('/dashboard');
-  };
-
-  const handleGuestBypass = () => {
-    const preset = ORGANISATION_PRESETS.citizen;
-    setUser(
-      {
-        ...preset,
-        name: 'Public Citizen (Guest)',
-        emailOrPhone: 'guest.citizen@nivaran.gov.in',
-      },
-      false
-    );
-    addToast({
-      title: 'Guest Access Active',
-      message: 'Viewing public disaster command dashboard and emergency shelters.',
-      type: 'info',
-    });
-    navigate('/dashboard');
   };
 
   const filteredAuthorities = ALL_AUTHORITIES.filter((a) => {
@@ -623,11 +684,11 @@ export const LoginPage: React.FC = () => {
                 >
                   <span>{auth.shortLabel}</span>
                   <span
-                    className={`text-[10px] font-mono px-1 rounded ${
+                    className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                       selectedAuthorityId === auth.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                     }`}
                   >
-                    {auth.defaultPass}
+                    {auth.roleCode}
                   </span>
                 </button>
               ))}
@@ -636,6 +697,14 @@ export const LoginPage: React.FC = () => {
 
           {/* Sign In Form */}
           <form onSubmit={handleSignIn} className="space-y-4">
+            {/* Security Error Banner / Rate Limiting Alert */}
+            {authError && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
             {/* Input 1: Email or Phone */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -648,10 +717,14 @@ export const LoginPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  disabled={lockoutRemaining > 0}
                   value={emailOrPhone}
-                  onChange={(e) => setEmailOrPhone(e.target.value)}
+                  onChange={(e) => {
+                    setEmailOrPhone(e.target.value);
+                    if (authError) setAuthError(null);
+                  }}
                   placeholder="Official gov.in or nic.in identifier"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#008060] focus:ring-4 focus:ring-emerald-100 transition-all font-medium"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#008060] focus:ring-4 focus:ring-emerald-100 transition-all font-medium disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -668,10 +741,14 @@ export const LoginPage: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  disabled={lockoutRemaining > 0}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (authError) setAuthError(null);
+                  }}
                   placeholder="Security password"
-                  className="w-full pl-10 pr-16 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#008060] focus:ring-4 focus:ring-emerald-100 transition-all font-medium"
+                  className="w-full pl-10 pr-16 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#008060] focus:ring-4 focus:ring-emerald-100 transition-all font-medium disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
@@ -699,8 +776,8 @@ export const LoginPage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   addToast({
-                    title: 'Credential Assistance',
-                    message: `Default password for ${selectedAuthority.shortLabel} is "${password}". Click Sign In to enter.`,
+                    title: 'Credential Retrieval Assistance',
+                    message: 'Official authority credentials must be retrieved through your DDMA / SDMA IT administrator.',
                     type: 'info',
                   });
                 }}
@@ -718,25 +795,21 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Primary Action Button */}
-            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            {/* Primary Action Button (Strict Authentication Only - Direct Guest Bypass Removed) */}
+            <div className="pt-2">
               <button
                 type="submit"
-                disabled={isLoading}
-                className="flex-1 py-3.5 px-6 rounded-full bg-[#008060] hover:bg-[#006e52] active:bg-[#005a43] text-white font-bold text-sm shadow-md hover:shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                disabled={isLoading || lockoutRemaining > 0}
+                className="w-full py-3.5 px-6 rounded-full bg-[#008060] hover:bg-[#006e52] active:bg-[#005a43] text-white font-bold text-sm shadow-md hover:shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span>
-                  {isLoading ? 'Verifying Credentials...' : `Sign In as ${selectedAuthority.shortLabel}`}
+                  {lockoutRemaining > 0
+                    ? `Terminal Locked (${lockoutRemaining}s)`
+                    : isLoading
+                    ? 'Verifying Security Credentials...'
+                    : `Sign In to ${selectedAuthority.shortLabel} Portal`}
                 </span>
-                {!isLoading && <ArrowRight className="w-4 h-4" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleGuestBypass}
-                className="py-3.5 px-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <span>Explore as Guest</span>
+                {!isLoading && lockoutRemaining === 0 && <ArrowRight className="w-4 h-4" />}
               </button>
             </div>
           </form>

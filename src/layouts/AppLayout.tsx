@@ -484,21 +484,15 @@ const ALL_MODULES_GROUPS: NavGroup[] = [
   },
 ];
 
-const getNavTabLabel = (item: NavTabItem, lang: Language): string => {
-  if (lang === 'mr') return item.labelMr || item.labelHi || item.labelEn;
-  if (lang === 'hi') return item.labelHi || item.labelEn;
+const getNavTabLabel = (item: NavTabItem, _lang?: Language): string => {
   return item.labelEn;
 };
 
-const getNavTabDesc = (item: NavTabItem, lang: Language): string => {
-  if (lang === 'mr') return item.descMr || item.descHi || item.descEn || '';
-  if (lang === 'hi') return item.descHi || item.descEn || '';
+const getNavTabDesc = (item: NavTabItem, _lang?: Language): string => {
   return item.descEn || '';
 };
 
-const getNavGroupTitle = (grp: NavGroup, lang: Language): string => {
-  if (lang === 'mr') return grp.groupTitleMr || grp.groupTitleHi || grp.groupTitleEn;
-  if (lang === 'hi') return grp.groupTitleHi || grp.groupTitleEn;
+const getNavGroupTitle = (grp: NavGroup, _lang?: Language): string => {
   return grp.groupTitleEn;
 };
 
@@ -755,7 +749,7 @@ export const AppLayout: React.FC = () => {
               >
                 {DISTRICT_OPTIONS.map((opt) => (
                   <option key={opt.id} value={opt.id} className="text-slate-900 bg-white dark:bg-[#172F46] dark:text-white">
-                    {language === 'mr' ? opt.mr : language === 'hi' ? opt.hi : opt.en}
+                    {opt.en}
                   </option>
                 ))}
               </select>
@@ -1041,23 +1035,13 @@ export const AppLayout: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-[#0F291E] flex items-center gap-2">
-                          <span>
-                            {language === 'hi'
-                              ? 'सभी 24 प्लेटफ़ॉर्म मॉड्यूल एवं सेवाएँ'
-                              : language === 'mr'
-                              ? 'सर्व २४ प्लॅटफॉर्म विभाग व सेवा'
-                              : 'All 24 Platform Modules & Features'}
-                          </span>
+                          <span>All 24 Platform Modules & Features</span>
                           <span className="px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold bg-[#D1E7DD] text-[#0F5132]">
                             {filteredModulesCount} / {totalModulesCount} Active
                           </span>
                         </div>
                         <div className="text-[10.5px] text-[#355344]">
-                          {language === 'hi'
-                            ? 'प्रत्येक सुविधा का विवरण देखें और तुरंत शुरू करने के लिए क्लिक करें'
-                            : language === 'mr'
-                            ? 'प्रत्येक सुविधेचे वर्णन पहा व थेट सुरू करण्यासाठी क्लिक करा'
-                            : 'Explore all disaster capabilities and click any module to launch'}
+                          Explore all disaster capabilities and click any module to launch
                         </div>
                       </div>
                     </div>
@@ -1070,13 +1054,7 @@ export const AppLayout: React.FC = () => {
                           type="text"
                           value={moduleFilter}
                           onChange={(e) => setModuleFilter(e.target.value)}
-                          placeholder={
-                            language === 'hi'
-                              ? 'मॉड्यूल खोजें (उदा. SOS, 3D, Shelters)...'
-                              : language === 'mr'
-                              ? 'विभाग शोधा (उदा. SOS, 3D, निवारा)...'
-                              : 'Filter features (e.g. SOS, 3D, Shelters)...'
-                          }
+                          placeholder="Filter features (e.g. SOS, 3D, Shelters)..."
                           className="pl-8 pr-7 py-1 text-xs bg-[#F4F9F5] border border-[#D1E7DD] rounded-lg text-[#0F291E] placeholder:text-gray-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] w-48 sm:w-64"
                         />
                         {moduleFilter && (
@@ -1186,36 +1164,34 @@ export const AppLayout: React.FC = () => {
                   {/* Mega Menu Bottom Quick Bar */}
                   <div className="mt-3.5 pt-3 border-t border-[#D1E7DD] flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#355344]">
-                      <span className="font-semibold text-[#059669]">
-                        {language === 'hi' ? 'त्वरित लिंक:' : language === 'mr' ? 'थेट दुवे:' : 'Quick Jump:'}
-                      </span>
+                      <span className="font-semibold text-[#059669]">Quick Jump:</span>
                       <NavLink
                         to="/map"
                         onClick={() => setModulesDropdownOpen(false)}
                         className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
                       >
-                        📍 {language === 'hi' ? 'कमांड मैप' : language === 'mr' ? 'कमांड नकाशा' : 'Command Map'}
+                        📍 Command Map
                       </NavLink>
                       <NavLink
                         to="/citizen-portal"
                         onClick={() => setModulesDropdownOpen(false)}
                         className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
                       >
-                        🛡️ {language === 'hi' ? 'नागरिक पोर्टल' : language === 'mr' ? 'नागरिक पोर्टल' : 'Citizen Safety'}
+                        🛡️ Citizen Safety
                       </NavLink>
                       <NavLink
                         to="/sos"
                         onClick={() => setModulesDropdownOpen(false)}
                         className="px-2 py-0.5 rounded-md bg-red-100 hover:bg-red-200 text-red-700 font-bold"
                       >
-                        🚨 {language === 'hi' ? 'आपातकालीन एसओएस' : language === 'mr' ? 'आपत्कालीन एसओएस' : 'Emergency SOS'}
+                        🚨 Emergency SOS
                       </NavLink>
                       <NavLink
                         to="/national-portals"
                         onClick={() => setModulesDropdownOpen(false)}
                         className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
                       >
-                        🌐 {language === 'hi' ? 'राष्ट्रीय पोर्टल' : language === 'mr' ? 'राष्ट्रीय पोर्टल' : 'National Portals'}
+                        🌐 National Portals
                       </NavLink>
                     </div>
 

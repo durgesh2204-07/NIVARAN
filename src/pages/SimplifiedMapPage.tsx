@@ -319,103 +319,90 @@ const ZONE_LOCATION_WORDS_MAP: Record<
 > = {
   'az-01': {
     wordsEn: 'Irshalwadi Village, Khalapur Taluka, Raigad District, Western Ghats, Maharashtra, India',
-    wordsHi: 'इरशालवाडी गाँव, खालापूर तालुका, रायगड ज़िला, पश्चिमी घाट, महाराष्ट्र, भारत',
-    wordsMr: 'इरशाळवाडी गाव, खालापूर तालुका, रायगड जिल्हा, पश्चिम घाट, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Khalapur',
     district: 'Raigad',
     hazardSummaryEn: 'Severe Debris Flow & Slope Tension Crack (>212 mm / 24h rainfall)',
-    hazardSummaryHi: 'गंभीर मलबा प्रवाह और ढलान दरार (>212 मिमी / 24 घंटे वर्षा)',
-    hazardSummaryMr: 'तीव्र ढिगारा प्रवाह व उतारावरील तडे (>२१२ मिमी / २४ तास पाऊस)',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-02': {
     wordsEn: 'Mahad City & Taliye Catchment, Savitri River Basin, Raigad District, Maharashtra, India',
-    wordsHi: 'महाड शहर और तलिए जलग्रहण, सावित्री नदी बेसिन, रायगड ज़िला, महाराष्ट्र, भारत',
-    wordsMr: 'महाड शहर आणि तळीये पाणलोट क्षेत्र, सावित्री नदी खोरे, रायगड जिल्हा, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Mahad',
     district: 'Raigad',
     hazardSummaryEn: 'Riverine Flash Inundation; Savitri River 0.8m above Danger Mark',
-    hazardSummaryHi: 'नदी बाढ़ जलभराव; सावित्री नदी खतरे के निशान से 0.8 मीटर ऊपर',
-    hazardSummaryMr: 'नदी पूर पाणी भरणे; सावित्री नदी धोक्याच्या पातळीपेक्षा ०.८ मीटर वर',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-03': {
     wordsEn: 'Ambenali Ghat Pass, Mahabaleshwar Taluka, Satara District, Western Ghats, Maharashtra, India',
-    wordsHi: 'आंबेनळी घाट दर्रा, महाबळेश्वर तालुका, सातारा ज़िला, पश्चिमी घाट, महाराष्ट्र, भारत',
-    wordsMr: 'आंबेनळी घाट रस्ता, महाबळेश्वर तालुका, सातारा जिल्हा, पश्चिम घाट, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Mahabaleshwar',
     district: 'Satara',
     hazardSummaryEn: 'Heavy Ghat Rainfall & Landslide Hazard (168 mm / 24h rainfall)',
-    hazardSummaryHi: 'भारी घाट वर्षा और भूस्खलन खतरा (168 मिमी / 24 घंटे वर्षा)',
-    hazardSummaryMr: 'मुसळधार घाट पाऊस व दरड कोसळण्याचा धोका (१६८ मिमी / २४ तास पाऊस)',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-04': {
     wordsEn: 'Chiplun Town & Vashisthi River Floodplain Corridor, Ratnagiri District, Konkan, Maharashtra, India',
-    wordsHi: 'चिपळूण शहर और वाशिष्ठी नदी बाढ़ क्षेत्र, रत्नागिरी ज़िला, कोंकण, महाराष्ट्र, भारत',
-    wordsMr: 'चिपळूण शहर आणि वाशिष्ठी नदी पूर क्षेत्र, रत्नागिरी जिल्हा, कोकण, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Chiplun',
     district: 'Ratnagiri',
     hazardSummaryEn: 'Tidal Inundation & Koyna Tailrace Water Release High Tide Coincidence',
-    hazardSummaryHi: 'ज्वारीय जलभराव और कोयना टेलरेस पानी छोड़ना व उच्च ज्वार संयोग',
-    hazardSummaryMr: 'भरतीचे पाणी भरणे आणि कोयना टेलरेस पाणी सोडणे व उधाण भरती संयोग',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-05': {
     wordsEn: 'Lonavala & Maval Valley, Tamhini Ghat Corridor, Pune District, Maharashtra, India',
-    wordsHi: 'लोणावळा और मावळ घाटी, ताम्हिणी घाट कॉरिडोर, पुणे ज़िला, महाराष्ट्र, भारत',
-    wordsMr: 'लोणावळा आणि मावळ खोरे, ताम्हिणी घाट कॉरिडॉर, पुणे जिल्हा, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Maval',
     district: 'Pune',
     hazardSummaryEn: 'Damini Lightning Watch & Indrayani River Causeway Watch (88 mm / 24h rainfall)',
-    hazardSummaryHi: 'दामिनी आकाशीय बिजली चेतावनी व इंद्रायणी कॉजवे निगरानी (88 मिमी वर्षा)',
-    hazardSummaryMr: 'दामिनी वीज इशारा व इंद्रायणी पूल/कॉजवे देखरेख (८८ मिमी पाऊस)',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-06': {
     wordsEn: 'Malin & Dimbhe Dam Sub-Basin, Ambegaon Taluka, Pune District, Maharashtra, India',
-    wordsHi: 'माळिण और डिंभे बाँध उप-बेसिन, आंबेगाव तालुका, पुणे ज़िला, महाराष्ट्र, भारत',
-    wordsMr: 'माळीण आणि डिंभे धरण उपखोरे, आंबेगाव तालुका, पुणे जिल्हा, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Ambegaon',
     district: 'Pune',
     hazardSummaryEn: 'Moderate-Heavy Precipitation Watch across Ghod River Catchment (74 mm rainfall)',
-    hazardSummaryHi: 'घोड नदी जलग्रहण में मध्यम-भारी वर्षा निगरानी (74 मिमी वर्षा)',
-    hazardSummaryMr: 'घोड नदी पाणलोट क्षेत्रात मध्यम-मुसळधार पाऊस देखरेख (७४ मिमी पाऊस)',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-07': {
     wordsEn: 'Pune District Emergency Operations Center (DEOC), Collector Office, Pune, Maharashtra 411001, India',
-    wordsHi: 'पुणे जिला आपदा नियंत्रण केंद्र (DEOC), कलेक्ट्रेट, पुणे, महाराष्ट्र 411001, भारत',
-    wordsMr: 'पुणे जिल्हा आपत्कालीन नियंत्रण केंद्र (DEOC), जिल्हाधिकारी कार्यालय, पुणे, महाराष्ट्र ४११००१, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Shivajinagar / Haveli',
     district: 'Pune',
     hazardSummaryEn: 'District Emergency Operations Center & State Relief Logistics Command Hub (<18 mm rainfall)',
-    hazardSummaryHi: 'जिला आपदा परिचालन केंद्र एवं राज्य राहत कमान केंद्र (<18 मिमी वर्षा)',
-    hazardSummaryMr: 'जिल्हा आपत्कालीन नियंत्रण केंद्र व राज्य मदत रसद कमान (<१८ मिमी पाऊस)',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
   'az-08': {
     wordsEn: 'Panchganga Basin Monitor Zone, Karveer & Shirol Taluka, Kolhapur District, Maharashtra, India',
-    wordsHi: 'पंचगंगा बेसिन निगरानी क्षेत्र, करवीर और शिरोळ तालुका, कोल्हापूर ज़िला, महाराष्ट्र, भारत',
-    wordsMr: 'पंचगंगा खोरे देखरेख क्षेत्र, करवीर व शिरोळ तालुका, कोल्हापूर जिल्हा, महाराष्ट्र, भारत',
+    wordsHi: '',
+    wordsMr: '',
     taluka: 'Karveer / Shirol',
     district: 'Kolhapur',
     hazardSummaryEn: 'River level 2.4m below warning threshold at Rajaram Weir; Safe status',
-    hazardSummaryHi: 'राजाराम वियर पर नदी स्तर चेतावनी सीमा से 2.4 मी नीचे; सुरक्षित स्थिति',
-    hazardSummaryMr: 'राजाराम बंधाऱ्यावर नदी पातळी इशारा रेषेपेक्षा २.४ मी खाली; सुरक्षित स्थिती',
+    hazardSummaryHi: '',
+    hazardSummaryMr: '',
   },
 };
 
-function getZoneLocationDetails(zone: ActiveAlertZone, lang: 'en' | 'hi' | 'mr' = 'en') {
+function getZoneLocationDetails(zone: ActiveAlertZone) {
   const mapped = ZONE_LOCATION_WORDS_MAP[zone.id];
-  const words = mapped
-    ? lang === 'hi'
-      ? mapped.wordsHi
-      : lang === 'mr'
-        ? mapped.wordsMr
-        : mapped.wordsEn
-    : `${zone.areaName}, ${zone.district} District, Maharashtra, India`;
-
-  const hazardSummary = mapped
-    ? lang === 'hi'
-      ? mapped.hazardSummaryHi
-      : lang === 'mr'
-        ? mapped.hazardSummaryMr
-        : mapped.hazardSummaryEn
-    : zone.instructions;
+  const words = mapped ? mapped.wordsEn : `${zone.areaName}, ${zone.district} District, Maharashtra, India`;
+  const hazardSummary = mapped ? mapped.hazardSummaryEn : zone.instructions;
 
   const taluka = mapped?.taluka || zone.areaName.split(',')[1]?.trim() || zone.district;
   const district = zone.district;
@@ -600,7 +587,7 @@ export const SimplifiedMapPage: React.FC = () => {
     'Heavy rainfall and slope instability detected. Stay alert and prepare for evacuation.'
   );
   const [zoneMessageHi, setZoneMessageHi] = useState(
-    'भारी वर्षा और भूस्खलन का खतरा। सतर्क रहें और सुरक्षित आश्रय में जाने के लिए तैयार रहें।'
+    'Heavy rainfall and slope instability warning. Stay alert and prepare for evacuation.'
   );
   const [zoneInstructions, setZoneInstructions] = useState(
     'Warning / Be Prepared. Keep emergency kit ready and stay tuned to control room updates.'
@@ -2350,9 +2337,9 @@ export const SimplifiedMapPage: React.FC = () => {
     setSelectedMhVillage('');
     const d = MAHARASHTRA_DISTRICTS_DATA.find((item) => item.name === districtName);
     if (d) {
-      flyToAndInspect(`${d.name} (${d.nameMr}) - District Center`, d.lat, d.lng, d.zoom);
+      flyToAndInspect(`${d.name} - District Center`, d.lat, d.lng, d.zoom);
       useAppStore.getState().showSingleToast({
-        title: `📍 ${d.name} (${d.nameMr})`,
+        title: `📍 ${d.name}`,
         message: `District Center mapped on GIS view · ${d.talukas.length} Talukas available`,
         type: 'info',
       });
@@ -2365,9 +2352,9 @@ export const SimplifiedMapPage: React.FC = () => {
     if (!talukaName || !currentDistrictData) return;
     const t = currentDistrictData.talukas.find((item) => item.name === talukaName);
     if (t) {
-      flyToAndInspect(`${t.name} (${t.nameMr}) - ${currentDistrictData.name} Taluka`, t.lat, t.lng, t.zoom || 13.5);
+      flyToAndInspect(`${t.name} - ${currentDistrictData.name} Taluka`, t.lat, t.lng, t.zoom || 13.5);
       useAppStore.getState().showSingleToast({
-        title: `📍 ${t.name} (${t.nameMr}) Taluka`,
+        title: `📍 ${t.name} Taluka`,
         message: `${currentDistrictData.name} District · ${t.villages.length} Monitored Gaons/Villages`,
         type: 'info',
       });
@@ -2393,13 +2380,13 @@ export const SimplifiedMapPage: React.FC = () => {
     const vilInTaluka = currentTalukaData?.villages.find((v) => v.name === villageName);
     if (vilInTaluka) {
       flyToAndInspect(
-        `${vilInTaluka.name} (${vilInTaluka.nameMr}) · ${currentTalukaData?.name}, ${currentDistrictData?.name}`,
+        `${vilInTaluka.name} · ${currentTalukaData?.name}, ${currentDistrictData?.name}`,
         vilInTaluka.lat,
         vilInTaluka.lng,
         15.2
       );
       useAppStore.getState().showSingleToast({
-        title: `📍 ${vilInTaluka.name} (${vilInTaluka.nameMr})`,
+        title: `📍 ${vilInTaluka.name}`,
         message: `${currentTalukaData?.name} Taluka · ${vilInTaluka.hazardType || 'Gaon Mapped on GIS'}`,
         type: 'info',
       });
@@ -2466,7 +2453,7 @@ export const SimplifiedMapPage: React.FC = () => {
         (pl.taluka && pl.taluka.toLowerCase().includes(q))
       ) {
         matches.push({
-          label: `${pl.nameMr} · ${pl.name} (${pl.district})`,
+          label: `${pl.name} (${pl.district})`,
           category: pl.category,
           lat: pl.lat,
           lng: pl.lng,
@@ -3514,10 +3501,10 @@ export const SimplifiedMapPage: React.FC = () => {
                 aria-label="Select Maharashtra District"
                 title="Select Maharashtra District"
               >
-                <option value="">-- जिल्हा / District --</option>
+                <option value="">-- Select District --</option>
                 {MAHARASHTRA_DISTRICTS_DATA.map((d) => (
                   <option key={d.id} value={d.name}>
-                    📍 {d.name} ({d.nameMr})
+                    📍 {d.name}
                   </option>
                 ))}
               </select>
@@ -3531,10 +3518,10 @@ export const SimplifiedMapPage: React.FC = () => {
                 aria-label="Select Taluka"
                 title="Select Taluka"
               >
-                <option value="">-- तालुका / Taluka --</option>
+                <option value="">-- Select Taluka --</option>
                 {currentDistrictData?.talukas.map((t) => (
                   <option key={t.name} value={t.name}>
-                    🏛️ {t.name} ({t.nameMr})
+                    🏛️ {t.name}
                   </option>
                 ))}
               </select>
@@ -3548,10 +3535,10 @@ export const SimplifiedMapPage: React.FC = () => {
                 aria-label="Select Village / Gaon"
                 title="Select Village or Gaon"
               >
-                <option value="">-- गाव / Village / Gaon --</option>
+                <option value="">-- Select Village / Gaon --</option>
                 {currentTalukaData?.villages.map((v) => (
                   <option key={v.name} value={v.name}>
-                    🏡 {v.name} ({v.nameMr})
+                    🏡 {v.name}
                   </option>
                 ))}
               </select>
@@ -3894,7 +3881,7 @@ export const SimplifiedMapPage: React.FC = () => {
             </div>
             <div>
               <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                CAP Message (Hindi / हिंदी)
+                Secondary Advisory (English)
               </label>
               <input
                 type="text"

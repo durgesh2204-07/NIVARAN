@@ -417,7 +417,7 @@ export const CitizenPortalPage: React.FC = () => {
                 Your Habitation Risk Status
               </div>
               <h2 className="font-heading text-xl font-extrabold text-[#0F172A] dark:text-white mt-0.5">
-                {selectedVillage.name} ({selectedVillage.nameMr})
+                {selectedVillage.name}
               </h2>
               <div className="text-xs text-slate-500">
                 {selectedVillage.taluka} Taluka, {selectedVillage.district} District, {selectedVillage.state || 'Maharashtra'}

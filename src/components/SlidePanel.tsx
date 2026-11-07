@@ -281,12 +281,6 @@ export const SlidePanel: React.FC = () => {
                       <span>District: <strong>{data.district}</strong></span>
                       <span>·</span>
                       <span>State: <strong>{data.state || 'Maharashtra'}</strong></span>
-                      {(data.nameMr || data.nameHi) && (
-                        <>
-                          <span>·</span>
-                          <span className="font-semibold">{data.nameMr || data.nameHi}</span>
-                        </>
-                      )}
                     </div>
                   </div>
 

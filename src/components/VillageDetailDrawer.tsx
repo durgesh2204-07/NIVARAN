@@ -104,10 +104,7 @@ export const VillageDetailDrawer: React.FC<VillageDetailDrawerProps> = ({
             </span>
           </div>
           <h3 className="font-heading text-xl font-bold mt-0.5">
-            {village.name}{' '}
-            <span className="text-sm font-normal text-slate-300">
-              ({village.nameMr})
-            </span>
+            {village.name}
           </h3>
           <div className="text-[11px] text-slate-300 font-mono mt-1">
             GPS: {village.lat.toFixed(4)}Â°N, {village.lng.toFixed(4)}Â°E â€¢ Elev:{' '}
