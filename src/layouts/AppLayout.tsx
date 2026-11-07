@@ -16,6 +16,7 @@ import {
   FileCheck2,
   FileText,
   Flame,
+  Gauge,
   Globe,
   HeartHandshake,
   History,
@@ -34,6 +35,7 @@ import {
   Siren,
   Sliders,
   Sun,
+  TrendingUp,
   Truck,
   Users,
   Wifi,
@@ -105,67 +107,67 @@ const STAFF_ROLES: UserRole[] = [
  */
 const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
+    to: '/dashboard',
+    labelEn: 'Overview Dashboard',
+    labelHi: 'Overview Dashboard',
+    labelMr: 'Overview Dashboard',
+    icon: BarChart3,
+    roles: ALL_ROLES,
+  },
+  {
     to: '/map',
     labelEn: 'Command Map',
-    labelHi: 'कमांड मैप',
-    labelMr: 'कमांड नकाशा',
+    labelHi: 'Command Map',
+    labelMr: 'Command Map',
     icon: Globe,
+    roles: ALL_ROLES,
+  },
+  {
+    to: '/climate-vulnerability',
+    labelEn: 'AI Village Climate Vulnerability Score',
+    labelHi: 'AI Village Climate Vulnerability Score',
+    labelMr: 'AI Village Climate Vulnerability Score',
+    icon: Gauge,
+    roles: ALL_ROLES,
+  },
+  {
+    to: '/climate-impact-prediction',
+    labelEn: 'AI Climate Impact Prediction',
+    labelHi: 'AI Climate Impact Prediction',
+    labelMr: 'AI Climate Impact Prediction',
+    icon: TrendingUp,
+    roles: ALL_ROLES,
+  },
+  {
+    to: '/climate-anomaly-detection',
+    labelEn: 'Climate Anomaly Detection',
+    labelHi: 'Climate Anomaly Detection',
+    labelMr: 'Climate Anomaly Detection',
+    icon: Activity,
+    roles: ALL_ROLES,
+  },
+  {
+    to: '/hazard-map',
+    labelEn: 'Disaster Monitoring',
+    labelHi: 'Disaster Monitoring',
+    labelMr: 'Disaster Monitoring',
+    icon: AlertTriangle,
     roles: ALL_ROLES,
   },
   {
     to: '/disaster-history',
     labelEn: 'India Disaster History',
-    labelHi: 'भारत आपदा इतिहास',
-    labelMr: 'भारत आपत्ती इतिहास',
+    labelHi: 'India Disaster History',
+    labelMr: 'India Disaster History',
     icon: History,
     roles: ALL_ROLES,
   },
   {
     to: '/alerts',
     labelEn: 'Disaster Alerts',
-    labelHi: 'आपदा अलर्ट',
-    labelMr: 'इशारे व सूचना',
+    labelHi: 'Disaster Alerts',
+    labelMr: 'Disaster Alerts',
     icon: Bell,
-    roles: ALL_ROLES,
-  },
-  {
-    to: '/dashboard',
-    labelEn: 'Risk Zones',
-    labelHi: 'रेड ज़ोन जोखिम',
-    labelMr: 'रेड झोन जोखीम',
-    icon: ShieldAlert,
-    roles: ALL_ROLES,
-  },
-  {
-    to: '/relocation-sites',
-    labelEn: 'Safe Shelters',
-    labelHi: 'सुरक्षित आश्रय',
-    labelMr: 'सुरक्षित निवारा',
-    icon: Building2,
-    roles: ALL_ROLES,
-  },
-  {
-    to: '/planning',
-    labelEn: 'Relocation Planning',
-    labelHi: 'पुनर्वास योजना',
-    labelMr: 'पुनर्वसन नियोजन',
-    icon: MapPin,
-    roles: ALL_ROLES,
-  },
-  {
-    to: '/resources',
-    labelEn: 'Field & Supplies',
-    labelHi: 'राहत सामग्री',
-    labelMr: 'साधनसामग्री व मदत',
-    icon: Truck,
-    roles: ALL_ROLES,
-  },
-  {
-    to: '/impact',
-    labelEn: 'Analytics & SITREP',
-    labelHi: 'प्रभाव और विश्लेषण',
-    labelMr: 'प्रभाव व विश्लेषण',
-    icon: Activity,
     roles: ALL_ROLES,
   },
 ];
@@ -992,217 +994,6 @@ export const AppLayout: React.FC = () => {
               );
             })}
 
-            {/* Mega Dropdown: "All Modules" */}
-            <div className="relative shrink-0" ref={dropdownRef}>
-              <button
-                type="button"
-                onClick={() => setModulesDropdownOpen((v) => !v)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-[12.5px] font-bold transition-all cursor-pointer ${
-                  modulesDropdownOpen || isCurrentInDropdown
-                    ? 'bg-[#008060] text-white shadow-xs'
-                    : 'bg-white dark:bg-[#172F46] border border-slate-200 dark:border-[#233C57] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] shadow-2xs'
-                }`}
-              >
-                <Cpu className="w-3.5 h-3.5" strokeWidth={2} />
-                <span>
-                  {isCurrentInDropdown && currentTab
-                    ? getNavTabLabel(currentTab, language)
-                    : UI_STRINGS.moreModules[language]}
-                </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    modulesDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                  strokeWidth={2}
-                />
-              </button>
-
-              {/* All Modules Dropdown Panel */}
-              <AnimatePresence>
-                {modulesDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.96, y: -6 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96, y: -6 }}
-                    transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                    className="absolute left-0 lg:left-auto lg:right-0 xl:left-0 top-full mt-2 w-[940px] max-w-[96vw] bg-white border border-[#D1E7DD] rounded-2xl shadow-2xl p-4.5 z-50 origin-top"
-                  >
-                  {/* Mega Menu Top Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-[#D1E7DD]">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-[#E8F5E9] text-[#059669] flex items-center justify-center font-bold shadow-xs">
-                        <Cpu className="w-4 h-4" strokeWidth={2} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-[#0F291E] flex items-center gap-2">
-                          <span>All 24 Platform Modules & Features</span>
-                          <span className="px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold bg-[#D1E7DD] text-[#0F5132]">
-                            {filteredModulesCount} / {totalModulesCount} Active
-                          </span>
-                        </div>
-                        <div className="text-[10.5px] text-[#355344]">
-                          Explore all disaster capabilities and click any module to launch
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {/* Search Filter Input */}
-                      <div className="relative flex items-center">
-                        <Search className="w-3.5 h-3.5 text-[#059669] absolute left-2.5 pointer-events-none" />
-                        <input
-                          type="text"
-                          value={moduleFilter}
-                          onChange={(e) => setModuleFilter(e.target.value)}
-                          placeholder="Filter features (e.g. SOS, 3D, Shelters)..."
-                          className="pl-8 pr-7 py-1 text-xs bg-[#F4F9F5] border border-[#D1E7DD] rounded-lg text-[#0F291E] placeholder:text-gray-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] w-48 sm:w-64"
-                        />
-                        {moduleFilter && (
-                          <button
-                            type="button"
-                            onClick={() => setModuleFilter('')}
-                            className="absolute right-2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setModulesDropdownOpen(false)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#0F291E] hover:bg-[#E8F5E9] transition-colors"
-                        title="Close (Esc)"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* 4 Category Columns Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 max-h-[64vh] overflow-y-auto pr-1">
-                    {filteredModuleGroups.map((grp) => {
-                      const GrpIcon = grp.icon || Globe;
-                      return (
-                        <div key={grp.groupTitleEn} className="space-y-2 flex flex-col">
-                          {/* Category Header */}
-                          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#F4F9F5] border border-[#D1E7DD]/70">
-                            <div className="flex items-center gap-1.5">
-                              <GrpIcon className="w-3.5 h-3.5 text-[#059669]" strokeWidth={2} />
-                              <span className="text-[10px] font-bold font-mono text-[#059669] uppercase tracking-wide">
-                                {getNavGroupTitle(grp, language)}
-                              </span>
-                            </div>
-                            <span className="text-[9.5px] font-mono text-[#355344] font-bold">
-                              {grp.items.length}
-                            </span>
-                          </div>
-
-                          {/* Module Items */}
-                          <div className="space-y-1.5 flex-1">
-                            {grp.items.map((it) => {
-                              const Icon = it.icon;
-                              const label = getNavTabLabel(it, language);
-                              const desc = getNavTabDesc(it, language);
-                              const isActive = location.pathname === it.to;
-
-                              return (
-                                <NavLink
-                                  key={it.to}
-                                  to={it.to}
-                                  onClick={() => {
-                                    setModulesDropdownOpen(false);
-                                    setModuleFilter('');
-                                  }}
-                                  className={`group flex items-start gap-2.5 p-2 rounded-[10px] border transition-all ${
-                                    isActive
-                                      ? 'bg-[#059669] text-white border-[#047857] shadow-sm'
-                                      : 'bg-white hover:bg-[#E8F5E9] text-[#0F291E] border-[#D1E7DD]/70 hover:border-[#A7F3D0]'
-                                  }`}
-                                >
-                                  <div
-                                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                                      isActive
-                                        ? 'bg-white/20 text-white'
-                                        : 'bg-[#E8F5E9] text-[#059669] group-hover:bg-[#059669] group-hover:text-white'
-                                    }`}
-                                  >
-                                    <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-1">
-                                      <span
-                                        className={`text-xs font-bold leading-tight truncate ${
-                                          isActive ? 'text-white' : 'text-[#0F291E]'
-                                        }`}
-                                      >
-                                        {label}
-                                      </span>
-                                      {isActive && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
-                                      )}
-                                    </div>
-                                    {desc && (
-                                      <p
-                                        className={`text-[9.5px] leading-snug line-clamp-2 mt-0.5 ${
-                                          isActive ? 'text-emerald-100' : 'text-[#355344]'
-                                        }`}
-                                      >
-                                        {desc}
-                                      </p>
-                                    )}
-                                  </div>
-                                </NavLink>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Mega Menu Bottom Quick Bar */}
-                  <div className="mt-3.5 pt-3 border-t border-[#D1E7DD] flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#355344]">
-                      <span className="font-semibold text-[#059669]">Quick Jump:</span>
-                      <NavLink
-                        to="/map"
-                        onClick={() => setModulesDropdownOpen(false)}
-                        className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
-                      >
-                        📍 Command Map
-                      </NavLink>
-                      <NavLink
-                        to="/citizen-portal"
-                        onClick={() => setModulesDropdownOpen(false)}
-                        className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
-                      >
-                        🛡️ Citizen Safety
-                      </NavLink>
-                      <NavLink
-                        to="/sos"
-                        onClick={() => setModulesDropdownOpen(false)}
-                        className="px-2 py-0.5 rounded-md bg-red-100 hover:bg-red-200 text-red-700 font-bold"
-                      >
-                        🚨 Emergency SOS
-                      </NavLink>
-                      <NavLink
-                        to="/national-portals"
-                        onClick={() => setModulesDropdownOpen(false)}
-                        className="px-2 py-0.5 rounded-md bg-[#E8F5E9] hover:bg-[#D1FAE5] text-[#059669] font-bold"
-                      >
-                        🌐 National Portals
-                      </NavLink>
-                    </div>
-
-                    <div className="text-[10.5px] font-medium text-slate-600 dark:text-slate-400">
-                      Official Disaster Management Platform · Operational Authority
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </nav>
 
           {/* Right Sub-Header Info: Live IST Time */}

@@ -150,9 +150,9 @@ export const MASTER_NAV_GROUPS: NavGroupDef[] = [
       {
         num: 3.6,
         to: '/climate-vulnerability',
-        labelEn: 'Village Climate Vulnerability',
-        labelHi: 'Village Climate Vulnerability',
-        labelMr: 'Village Climate Vulnerability',
+        labelEn: 'AI Village Climate Vulnerability Score',
+        labelHi: 'AI Village Climate Vulnerability Score',
+        labelMr: 'AI Village Climate Vulnerability Score',
         descEn: '0–100 vulnerability score, factor breakdown & transparent AI explanation',
         descHi: '0–100 vulnerability score & transparent AI explanation',
         descMr: '0–100 vulnerability score & transparent AI explanation',
