@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -299,6 +299,49 @@ export const VillageDetailDrawer: React.FC<VillageDetailDrawerProps> = ({
           <p className="text-[11px] text-slate-500 mt-1">
             {village.lastIncidentSummary}
           </p>
+        </div>
+      </div>
+
+      {/* 3 AI Climate Intelligence Module Shortcuts */}
+      <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#0A1624]/60">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
+          <span>AI Climate Intelligence</span>
+          <span className="text-[9px] px-1 rounded bg-[#008060]/10 text-[#008060] font-bold">LIVE ML</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          <button
+            onClick={() => {
+              setSelectedVillageId(village.id);
+              onClose();
+              navigate(`/climate-vulnerability?villageId=${village.id}`);
+            }}
+            className="py-1.5 px-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold text-center hover:bg-emerald-100 transition-colors truncate"
+            title="Village Climate Vulnerability Score"
+          >
+            Vulnerability
+          </button>
+          <button
+            onClick={() => {
+              setSelectedVillageId(village.id);
+              onClose();
+              navigate(`/climate-impact-prediction?villageId=${village.id}`);
+            }}
+            className="py-1.5 px-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[11px] font-semibold text-center hover:bg-blue-100 transition-colors truncate"
+            title="AI Climate Impact Prediction"
+          >
+            Impact
+          </button>
+          <button
+            onClick={() => {
+              setSelectedVillageId(village.id);
+              onClose();
+              navigate(`/climate-anomaly-detection?villageId=${village.id}`);
+            }}
+            className="py-1.5 px-2 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 text-[11px] font-semibold text-center hover:bg-purple-100 transition-colors truncate"
+            title="Climate Anomaly Detection"
+          >
+            Anomalies
+          </button>
         </div>
       </div>
 

@@ -27,6 +27,15 @@ const HazardMapPage = lazy(() =>
 const ClimateIntelligencePage = lazy(() =>
   import('./pages/ClimateIntelligencePage').then((m) => ({ default: m.ClimateIntelligencePage }))
 );
+const VillageClimateVulnerabilityPage = lazy(() =>
+  import('./pages/VillageClimateVulnerabilityPage').then((m) => ({ default: m.VillageClimateVulnerabilityPage }))
+);
+const ClimateImpactPredictionPage = lazy(() =>
+  import('./pages/ClimateImpactPredictionPage').then((m) => ({ default: m.ClimateImpactPredictionPage }))
+);
+const ClimateAnomalyDetectionPage = lazy(() =>
+  import('./pages/ClimateAnomalyDetectionPage').then((m) => ({ default: m.ClimateAnomalyDetectionPage }))
+);
 const DashboardPage = lazy(() =>
   import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
 );
@@ -295,6 +304,36 @@ export const App: React.FC = () => {
                 element={
                   <RoleGuard allowed={ALL_ROLES} routeName="AI Climate Intelligence">
                     <ClimateIntelligencePage />
+                  </RoleGuard>
+                }
+              />
+
+              {/* 3.6. VILLAGE CLIMATE VULNERABILITY SCORE */}
+              <Route
+                path="/climate-vulnerability"
+                element={
+                  <RoleGuard allowed={ALL_ROLES} routeName="Village Climate Vulnerability">
+                    <VillageClimateVulnerabilityPage />
+                  </RoleGuard>
+                }
+              />
+
+              {/* 3.7. AI CLIMATE IMPACT PREDICTION */}
+              <Route
+                path="/climate-impact-prediction"
+                element={
+                  <RoleGuard allowed={ALL_ROLES} routeName="AI Climate Impact Prediction">
+                    <ClimateImpactPredictionPage />
+                  </RoleGuard>
+                }
+              />
+
+              {/* 3.8. CLIMATE ANOMALY DETECTION */}
+              <Route
+                path="/climate-anomaly-detection"
+                element={
+                  <RoleGuard allowed={ALL_ROLES} routeName="Climate Anomaly Detection">
+                    <ClimateAnomalyDetectionPage />
                   </RoleGuard>
                 }
               />

@@ -3072,6 +3072,54 @@ export const SimplifiedMapPage: React.FC = () => {
     }
   }, [searchParams]);
 
+  // Bidirectional Integration: Handle "Inspect on GIS Map" from 3 AI Climate Modules
+  useEffect(() => {
+    const vId = searchParams.get('villageId');
+    const climateModule = searchParams.get('climateModule');
+    const latStr = searchParams.get('lat');
+    const lngStr = searchParams.get('lng');
+    const anomalyId = searchParams.get('anomalyId');
+    const category = searchParams.get('category');
+
+    if (vId) {
+      const found = villages.find((v) => v.id === vId || v.name.toLowerCase() === vId.toLowerCase());
+      if (found) {
+        handleSelectVillageFromList(found);
+
+        if (climateModule === 'vulnerability') {
+          addToast({
+            title: `📍 GIS Climate Vulnerability Focus: ${found.name}`,
+            message: `Cadastral boundary activated for ${found.name}, ${found.district}. Evaluated under IPCC AR6 framework.`,
+            type: 'info',
+          });
+        } else if (climateModule === 'impact') {
+          addToast({
+            title: `📍 GIS Climate Impact Prediction: ${found.name}`,
+            message: `Visualizing predicted hazard envelope (${category || 'Multi-Hazard Risk'}) across ${found.name}.`,
+            type: 'warning',
+          });
+        } else if (climateModule === 'anomaly') {
+          addToast({
+            title: `📍 GIS Climate Anomaly Identified: ${found.name}`,
+            message: `Anomaly ID: ${anomalyId || 'Detected'}. 30-year IMD statistical baseline deviation active.`,
+            type: 'critical',
+          });
+        }
+      } else if (latStr && lngStr) {
+        const lat = parseFloat(latStr);
+        const lng = parseFloat(lngStr);
+        if (!isNaN(lat) && !isNaN(lng) && mapRef.current) {
+          mapRef.current.flyTo({
+            center: [lng, lat],
+            zoom: 14.0,
+            duration: 1200,
+            essential: true,
+          });
+        }
+      }
+    }
+  }, [searchParams, villages]);
+
   // GIS Spatial Buffer Query Analysis around active point (selectedVillage || inspectedPoint || gps)
   const spatialBufferAnalysis = useMemo(() => {
     const centerLat = selectedVillage
@@ -4692,6 +4740,40 @@ export const SimplifiedMapPage: React.FC = () => {
             <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
               Survey of India / GSI Verified
             </span>
+          </div>
+
+          {/* AI Climate Intelligence Modules Quick Jump */}
+          <div className="pt-1.5 border-t border-[var(--border)]">
+            <div className="font-bold text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1 flex items-center justify-between">
+              <span>AI Climate Intelligence</span>
+              <span className="text-[9px] px-1 rounded bg-emerald-500/10 text-[#008060] font-bold">LIVE ML</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <button
+                type="button"
+                onClick={() => navigate(selectedVillage ? `/climate-vulnerability?villageId=${selectedVillage.id}` : '/climate-vulnerability')}
+                className="py-1 px-1 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 transition-colors text-center truncate"
+                title="Village Climate Vulnerability"
+              >
+                Vulnerability
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(selectedVillage ? `/climate-impact-prediction?villageId=${selectedVillage.id}` : '/climate-impact-prediction')}
+                className="py-1 px-1 rounded text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800 hover:bg-blue-100 transition-colors text-center truncate"
+                title="AI Climate Impact Prediction"
+              >
+                Impact
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(selectedVillage ? `/climate-anomaly-detection?villageId=${selectedVillage.id}` : '/climate-anomaly-detection')}
+                className="py-1 px-1 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800 hover:bg-purple-100 transition-colors text-center truncate"
+                title="Climate Anomaly Detection"
+              >
+                Anomalies
+              </button>
+            </div>
           </div>
 
           {/* Collapsed "Advanced tools" drawer */}

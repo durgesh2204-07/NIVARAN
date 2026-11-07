@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Activity,
   AlertTriangle,
   Building2,
   Compass,
   Filter,
+  Gauge,
   Globe2,
   MapPin,
   Mic,
@@ -12,6 +14,7 @@ import {
   Search,
   ShieldAlert,
   Tent,
+  TrendingUp,
   Users,
   X,
 } from 'lucide-react';
@@ -35,6 +38,9 @@ const QUICK_NAV_ROUTES = [
   { path: '/alerts', name: 'Disaster Alerts & Advisories', desc: 'CAP-compliant early warnings & weather alerts', icon: AlertTriangle },
   { path: '/resources', name: 'Safe Shelters & Resources', desc: 'Relief camps, capacity & resource stocks', icon: Building2 },
   { path: '/planning', name: 'Relocation Site Planner', desc: 'Safe plateau carrying capacity & zoning', icon: MapPin },
+  { path: '/climate-vulnerability', name: 'Village Climate Vulnerability', desc: '0–100 vulnerability score, factor breakdown & transparent AI explanation', icon: Gauge },
+  { path: '/climate-impact-prediction', name: 'AI Climate Impact Prediction', desc: 'Forecast multi-hazard impacts on villages, agriculture, and water', icon: TrendingUp },
+  { path: '/climate-anomaly-detection', name: 'Climate Anomaly Detection', desc: 'Z-score deviation surveillance against 30-year IMD/Copernicus normal', icon: Activity },
   { path: '/community-reports', name: 'Field Hazard Reports', desc: 'Crowdsourced community incidents & hazard logs', icon: Users },
 ];
 

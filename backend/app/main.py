@@ -6,7 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import settings
 from app.database import db_manager
 from app.services.data_seeder import seed_database_if_empty
-from app.routers import auth, gis, risk, dashboard, relocation, regions
+from app.routers import auth, gis, risk, dashboard, relocation, regions, climate
 from app.rate_limiter import RateLimitMiddleware, rate_limiter, get_client_ip
 
 logging.basicConfig(
@@ -76,6 +76,7 @@ app.include_router(risk.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard.router, prefix=settings.API_V1_STR)
 app.include_router(relocation.router, prefix=settings.API_V1_STR)
 app.include_router(regions.router, prefix=settings.API_V1_STR)
+app.include_router(climate.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root_status(request: Request):
