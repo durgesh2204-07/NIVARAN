@@ -756,6 +756,13 @@ export const SimplifiedMapPage: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const userLocationMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const villageMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const shelterMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const volunteerMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const incidentMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const zoneBadgeMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const inspectedMarkerRef = useRef<maplibregl.Marker | null>(null);
   const selectedVillageMarkerRef = useRef<maplibregl.Marker | null>(null);
 
   const handleProviderChanged = (newProvider: MapProviderType) => {
@@ -1235,8 +1242,8 @@ export const SimplifiedMapPage: React.FC = () => {
         if (res && res.ok && mapRef.current) {
           mapRef.current.flyTo({
             center: [res.lng, res.lat],
-            zoom: 16.0,
-            duration: 950,
+            zoom: 12.5,
+            duration: 900,
             essential: true,
           });
         }
@@ -1421,8 +1428,8 @@ export const SimplifiedMapPage: React.FC = () => {
       if (is3D) {
         try {
           map.setTerrain({ source: 'terrarium_dem', exaggeration: 1.5 });
-          if (!was3D) {
-            map.easeTo({ pitch: 60, duration: 600 });
+          if (!was3D || map.getPitch() < 20) {
+            map.easeTo({ pitch: 58, duration: 600 });
           }
         } catch {
           // Ignore if DEM source not ready
@@ -1430,8 +1437,8 @@ export const SimplifiedMapPage: React.FC = () => {
       } else {
         try {
           map.setTerrain(null);
-          if (was3D) {
-            map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+          if (was3D || map.getPitch() > 0) {
+            map.easeTo({ pitch: 0, duration: 500 });
           }
         } catch {
           // Ignore
@@ -1706,44 +1713,53 @@ export const SimplifiedMapPage: React.FC = () => {
   // (2) All Habitations / Villages (with Red / Orange / Yellow / Green risk badges & village names)
   // (3) Shelters / Relief Camps (Available / Filling / Full)
   // (4) Opted-In Volunteers (Authorised roles)
-  // (5) Clicked / Inspected Point Pin
+  // 1. Dedicated Live User GPS Marker (Never recreates 370 village markers on GPS movement)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    if (!showMyLocation || gps.lat === null || gps.lng === null) {
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+        userLocationMarkerRef.current = null;
+      }
+      return;
+    }
 
-    // 1. My Location Pulsing Radar Beacon + Heading Arrow + Label
-    if (showMyLocation) {
+    const headingHtml =
+      gps.headingDeg !== null
+        ? `<div style="transform: rotate(${gps.headingDeg}deg)" class="text-[#059669] font-bold text-xs leading-none">▲</div>`
+        : '';
+    const labelText = gps.shortAddressInWords || 'My Live Location';
+    const accuracyText = `±${Math.round(gps.accuracyMeters)}m`;
+
+    if (!userLocationMarkerRef.current) {
       const el = document.createElement('div');
       el.className = 'flex flex-col items-center pointer-events-auto cursor-pointer';
-      const headingHtml =
-        gps.headingDeg !== null
-          ? `<div style="transform: rotate(${gps.headingDeg}deg)" class="text-[#059669] font-bold text-xs leading-none">▲</div>`
-          : '';
       el.innerHTML = `
         <div class="relative flex flex-col items-center group">
-          ${headingHtml}
+          <div id="user-gps-heading">${headingHtml}</div>
           <div class="relative flex items-center justify-center">
             <span class="absolute w-8 h-8 rounded-full bg-emerald-500/35 animate-ping"></span>
             <span class="w-4 h-4 rounded-full bg-[#059669] border-2 border-white shadow-lg block z-10"></span>
           </div>
           <span class="mt-1 px-2.5 py-0.5 rounded-full bg-[#059669] text-white text-[10.5px] font-bold shadow-md whitespace-nowrap border border-white flex items-center gap-1">
-            <span>🎯 ${gps.shortAddressInWords || 'My Live Location'}</span>
-            <span class="opacity-85 font-mono text-[9px]">(±${Math.round(gps.accuracyMeters)}m)</span>
+            <span id="user-gps-label">🎯 ${labelText}</span>
+            <span id="user-gps-acc" class="opacity-85 font-mono text-[9px]">(${accuracyText})</span>
           </span>
         </div>
       `;
+
       el.addEventListener('click', () => {
         if (mapRef.current) {
           mapRef.current.flyTo({
             center: [gps.lng, gps.lat],
-            zoom: 16,
+            zoom: 15.5,
             duration: 600,
           });
         }
       });
+
       const popup = new maplibregl.Popup({ offset: 20, closeButton: true }).setHTML(`
         <div style="font-family: system-ui, sans-serif; padding: 6px; min-width: 220px; max-width: 300px;">
           <div style="font-weight: 800; font-size: 13px; color: #059669; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
@@ -1762,51 +1778,87 @@ export const SimplifiedMapPage: React.FC = () => {
           </div>
         </div>
       `);
-      const userMarker = new maplibregl.Marker({ element: el })
+
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([gps.lng, gps.lat])
         .setPopup(popup)
         .addTo(map);
-      markersRef.current.push(userMarker);
+
+      userLocationMarkerRef.current = marker;
+    } else {
+      userLocationMarkerRef.current.setLngLat([gps.lng, gps.lat]);
+      const headingEl = document.getElementById('user-gps-heading');
+      if (headingEl) headingEl.innerHTML = headingHtml;
+      const labelEl = document.getElementById('user-gps-label');
+      if (labelEl) labelEl.textContent = `🎯 ${labelText}`;
+      const accEl = document.getElementById('user-gps-acc');
+      if (accEl) accEl.textContent = `(${accuracyText})`;
     }
+  }, [
+    showMyLocation,
+    gps.lat,
+    gps.lng,
+    gps.headingDeg,
+    gps.accuracyMeters,
+    gps.shortAddressInWords,
+    gps.addressInWords,
+    gps.qualityBadge,
+    gps.updatedAtIst,
+  ]);
 
-    // 1B. Active Alert Zone Centroid Badges on Map
-    if (showAlertZones) {
-      const visibleZones =
-        alertFilterLevel === 'ALL'
-          ? activeAlertZones
-          : activeAlertZones.filter((z) => z.level === alertFilterLevel);
-      visibleZones.forEach((zone) => {
-        const meta = getAlertLevelMeta(zone.level);
-        const rawScore =
-          (zone as any).risk_score ??
-          (zone.level === 'Red' ? 88.5 : zone.level === 'Yellow' ? 68.0 : zone.level === 'Orange' ? 48.0 : 18.0);
-        const score = Number(rawScore).toFixed(1);
-        const shortName = zone.areaName.split(',')[0];
+  // 1B. Active Alert Zone Centroid Badges on Map
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
 
-        const badge = document.createElement('button');
-        badge.type = 'button';
-        badge.className =
-          'px-2.5 py-1 rounded-full text-[11px] font-sans font-bold text-white shadow-xl border-2 border-white flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all';
-        badge.style.backgroundColor = meta.bg;
-        badge.innerHTML = `
-          <span style="background: rgba(0,0,0,0.32); padding: 1px 6px; border-radius: 9999px; font-weight: 800; font-family: monospace;">Score: ${score}</span>
-          <span>${shortName}</span>
-        `;
-        badge.title = `${zone.areaName} — Risk Score: ${score}/100 (${zone.level} Zone)`;
-        badge.onclick = (ev) => {
-          ev.stopPropagation();
-          detectAndFocusZoneRef.current?.(zone);
-        };
-        const zm = new maplibregl.Marker({ element: badge })
-          .setLngLat([zone.centerLng, zone.centerLat])
-          .addTo(map);
-        markersRef.current.push(zm);
-      });
-    }
+    zoneBadgeMarkersRef.current.forEach((m) => m.remove());
+    zoneBadgeMarkersRef.current = [];
 
-    // 2. All Habitations / Villages with Name Labels & Risk Colour (Red / Orange / Yellow / Green)
-    // When showHabitations is true -> render all habitations.
-    // When a search is active (villageSearchTerm or searchQuery) -> render ALL matching habitations on the map!
+    if (!showAlertZones) return;
+
+    const visibleZones =
+      alertFilterLevel === 'ALL'
+        ? activeAlertZones
+        : activeAlertZones.filter((z) => z.level === alertFilterLevel);
+
+    visibleZones.forEach((zone) => {
+      const meta = getAlertLevelMeta(zone.level);
+      const rawScore =
+        (zone as any).risk_score ??
+        (zone.level === 'Red' ? 88.5 : zone.level === 'Yellow' ? 68.0 : zone.level === 'Orange' ? 48.0 : 18.0);
+      const score = Number(rawScore).toFixed(1);
+      const shortName = zone.areaName.split(',')[0];
+
+      const badge = document.createElement('button');
+      badge.type = 'button';
+      badge.className =
+        'px-2.5 py-1 rounded-full text-[11px] font-sans font-bold text-white shadow-xl border-2 border-white flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all';
+      badge.style.backgroundColor = meta.bg;
+      badge.innerHTML = `
+        <span style="background: rgba(0,0,0,0.32); padding: 1px 6px; border-radius: 9999px; font-weight: 800; font-family: monospace;">Score: ${score}</span>
+        <span>${shortName}</span>
+      `;
+      badge.title = `${zone.areaName} — Risk Score: ${score}/100 (${zone.level} Zone)`;
+      badge.onclick = (ev) => {
+        ev.stopPropagation();
+        detectAndFocusZoneRef.current?.(zone);
+      };
+      const zm = new maplibregl.Marker({ element: badge })
+        .setLngLat([zone.centerLng, zone.centerLat])
+        .addTo(map);
+      zoneBadgeMarkersRef.current.push(zm);
+    });
+  }, [showAlertZones, alertFilterLevel, activeAlertZones]);
+
+  // 2. All Habitations / Villages with Name Labels & Risk Colour (Red / Orange / Yellow / Green)
+  // Rebuilds ONLY when habitations list, showHabitations, alertFilterLevel, search, or weights change (Zero GPS coupling!)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    villageMarkersRef.current.forEach((m) => m.remove());
+    villageMarkersRef.current = [];
+
     const activeSearchQuery = (villageSearchTerm.trim() || searchQuery.trim()).toLowerCase();
     const villagesToDisplay = showHabitations
       ? villages
@@ -1814,8 +1866,6 @@ export const SimplifiedMapPage: React.FC = () => {
         ? villages.filter((v) => {
             return (
               v.name.toLowerCase().includes(activeSearchQuery) ||
-              v.nameHi?.toLowerCase().includes(activeSearchQuery) ||
-              v.nameMr?.toLowerCase().includes(activeSearchQuery) ||
               v.taluka.toLowerCase().includes(activeSearchQuery) ||
               v.district.toLowerCase().includes(activeSearchQuery) ||
               v.primaryHazard?.toLowerCase().includes(activeSearchQuery)
@@ -1825,9 +1875,6 @@ export const SimplifiedMapPage: React.FC = () => {
 
     if (villagesToDisplay.length > 0) {
       villagesToDisplay.forEach((v) => {
-        // If it's the currently focused village, the selected marker (4C) renders its prominent pulsing pin
-        if (selectedVillage?.id === v.id && !showHabitations) return;
-
         const meta = getVillageZoneMeta(v);
         if (alertFilterLevel !== 'ALL' && showHabitations) {
           if (alertFilterLevel === 'Red' && meta.tier !== 'Red') return;
@@ -1851,97 +1898,141 @@ export const SimplifiedMapPage: React.FC = () => {
         const m = new maplibregl.Marker({ element: btn })
           .setLngLat([v.lng, v.lat])
           .addTo(map);
-        markersRef.current.push(m);
+        villageMarkersRef.current.push(m);
       });
     }
+  }, [
+    showHabitations,
+    alertFilterLevel,
+    villages,
+    weights,
+    villageSearchTerm,
+    searchQuery,
+  ]);
 
-    // 3. Shelters Markers with Name & Status
-    if (showShelters) {
-      reliefCamps.forEach((camp) => {
-        const meta = getShelterStatusMeta(camp);
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className =
-          'px-2 py-0.5 rounded-[6px] text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer hover:scale-105 transition-transform';
-        btn.style.backgroundColor = meta.colorHex;
-        const shortName = camp.name.split(' ').slice(0, 2).join(' ');
-        btn.innerHTML = `<span>⛺</span><span>${shortName} (${meta.statusText})</span>`;
-        btn.title = `${camp.name} (${meta.statusText} · ${meta.freeBeds} free beds)`;
-        btn.onclick = (ev) => {
-          ev.stopPropagation();
-          setSelectedZone(null);
-          clearZoneHighlightAndPopup();
-          setSelectedVolunteer(null);
-          setSelectedVillage(null);
-          setInspectedPoint(null);
-          setSelectedShelter(camp);
-        };
-        const m = new maplibregl.Marker({ element: btn })
-          .setLngLat([camp.lng, camp.lat])
-          .addTo(map);
-        markersRef.current.push(m);
-      });
+  // 3. Shelters Markers with Name & Status
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    shelterMarkersRef.current.forEach((m) => m.remove());
+    shelterMarkersRef.current = [];
+
+    if (!showShelters) return;
+
+    reliefCamps.forEach((camp) => {
+      const meta = getShelterStatusMeta(camp);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className =
+        'px-2 py-0.5 rounded-[6px] text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer hover:scale-105 transition-transform';
+      btn.style.backgroundColor = meta.colorHex;
+      const shortName = camp.name.split(' ').slice(0, 2).join(' ');
+      btn.innerHTML = `<span>⛺</span><span>${shortName} (${meta.statusText})</span>`;
+      btn.title = `${camp.name} (${meta.statusText} · ${meta.freeBeds} free beds)`;
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        setSelectedZone(null);
+        clearZoneHighlightAndPopup();
+        setSelectedVolunteer(null);
+        setSelectedVillage(null);
+        setInspectedPoint(null);
+        setSelectedShelter(camp);
+      };
+      const m = new maplibregl.Marker({ element: btn })
+        .setLngLat([camp.lng, camp.lat])
+        .addTo(map);
+      shelterMarkersRef.current.push(m);
+    });
+  }, [reliefCamps, showShelters]);
+
+  // 4. Volunteers Markers (Authorised roles + optedInLocationSharing === true)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    volunteerMarkersRef.current.forEach((m) => m.remove());
+    volunteerMarkersRef.current = [];
+
+    if (visibleVolunteers.length === 0) return;
+
+    visibleVolunteers.forEach((vol) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className =
+        'px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer';
+      btn.style.backgroundColor =
+        vol.status === 'Available'
+          ? '#0B8F80'
+          : vol.status === 'Busy'
+            ? '#CA8A04'
+            : '#475569';
+      btn.innerHTML = `<span>✚</span><span>${vol.name.split(' ')[0]}</span>`;
+      btn.title = `Volunteer: ${vol.name} (${vol.status})`;
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        setSelectedZone(null);
+        clearZoneHighlightAndPopup();
+        setSelectedShelter(null);
+        setSelectedVillage(null);
+        setInspectedPoint(null);
+        setSelectedVolunteer(vol);
+      };
+      const m = new maplibregl.Marker({ element: btn })
+        .setLngLat([vol.lng, vol.lat])
+        .addTo(map);
+      volunteerMarkersRef.current.push(m);
+    });
+  }, [visibleVolunteers]);
+
+  // 4B. Active Field Incidents Markers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    incidentMarkersRef.current.forEach((m) => m.remove());
+    incidentMarkersRef.current = [];
+
+    if (!showIncidents || incidents.length === 0) return;
+
+    incidents.forEach((inc) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className =
+        'px-2 py-0.5 rounded-[6px] text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer hover:scale-105 transition-transform';
+      btn.style.backgroundColor =
+        inc.status === 'Resolved'
+          ? '#15803D'
+          : inc.severity === 'Critical'
+            ? '#DC2626'
+            : '#EA580C';
+      btn.innerHTML = `<span>🔥</span><span>${inc.code}: ${inc.villageName}</span>`;
+      btn.title = `${inc.code} — ${inc.title} (${inc.status})`;
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        flyToAndInspect(`${inc.code}: ${inc.title}`, inc.lat, inc.lng, 14.2);
+      };
+      const m = new maplibregl.Marker({ element: btn })
+        .setLngLat([inc.lng, inc.lat])
+        .addTo(map);
+      incidentMarkersRef.current.push(m);
+    });
+  }, [incidents, showIncidents]);
+
+  // 5. Inspected / Searched Location Pin
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!inspectedPoint) {
+      if (inspectedMarkerRef.current) {
+        inspectedMarkerRef.current.remove();
+        inspectedMarkerRef.current = null;
+      }
+      return;
     }
 
-    // 4. Volunteers Markers (Authorised roles + optedInLocationSharing === true)
-    if (visibleVolunteers.length > 0) {
-      visibleVolunteers.forEach((vol) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className =
-          'px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer';
-        btn.style.backgroundColor =
-          vol.status === 'Available'
-            ? '#0B8F80'
-            : vol.status === 'Busy'
-              ? '#CA8A04'
-              : '#475569';
-        btn.innerHTML = `<span>✚</span><span>${vol.name.split(' ')[0]}</span>`;
-        btn.title = `Volunteer: ${vol.name} (${vol.status})`;
-        btn.onclick = (ev) => {
-          ev.stopPropagation();
-          setSelectedZone(null);
-          clearZoneHighlightAndPopup();
-          setSelectedShelter(null);
-          setSelectedVillage(null);
-          setInspectedPoint(null);
-          setSelectedVolunteer(vol);
-        };
-        const m = new maplibregl.Marker({ element: btn })
-          .setLngLat([vol.lng, vol.lat])
-          .addTo(map);
-        markersRef.current.push(m);
-      });
-    }
-
-    // 4B. Active Field Incidents Markers
-    if (showIncidents && incidents.length > 0) {
-      incidents.forEach((inc) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className =
-          'px-2 py-0.5 rounded-[6px] text-[10px] font-bold text-white shadow border border-white flex items-center gap-1 cursor-pointer hover:scale-105 transition-transform';
-        btn.style.backgroundColor =
-          inc.status === 'Resolved'
-            ? '#15803D'
-            : inc.severity === 'Critical'
-              ? '#DC2626'
-              : '#EA580C';
-        btn.innerHTML = `<span>🔥</span><span>${inc.code}: ${inc.villageName}</span>`;
-        btn.title = `${inc.code} — ${inc.title} (${inc.status})`;
-        btn.onclick = (ev) => {
-          ev.stopPropagation();
-          flyToAndInspect(`${inc.code}: ${inc.title}`, inc.lat, inc.lng, 14.2);
-        };
-        const m = new maplibregl.Marker({ element: btn })
-          .setLngLat([inc.lng, inc.lat])
-          .addTo(map);
-        markersRef.current.push(m);
-      });
-    }
-
-    // 5. Inspected / Searched Location Pin
-    if (inspectedPoint) {
+    if (!inspectedMarkerRef.current) {
       const pinEl = document.createElement('div');
       pinEl.className =
         'px-2 py-1 rounded bg-[#0B1F33] text-white text-[10px] font-mono font-bold border-2 border-[#14B8A6] shadow-lg';
@@ -1949,31 +2040,15 @@ export const SimplifiedMapPage: React.FC = () => {
       const m = new maplibregl.Marker({ element: pinEl })
         .setLngLat([inspectedPoint.lng, inspectedPoint.lat])
         .addTo(map);
-      markersRef.current.push(m);
+      inspectedMarkerRef.current = m;
+    } else {
+      inspectedMarkerRef.current.setLngLat([inspectedPoint.lng, inspectedPoint.lat]);
+      const pinEl = inspectedMarkerRef.current.getElement();
+      pinEl.innerHTML = `📍 ${inspectedPoint.label.slice(0, 28)}`;
     }
-  }, [
-    gps.lat,
-    gps.lng,
-    gps.headingDeg,
-    gps.accuracyMeters,
-    gps.addressInWords,
-    gps.shortAddressInWords,
-    showMyLocation,
-    showAlertZones,
-    alertFilterLevel,
-    activeAlertZones,
-    showHabitations,
-    showShelters,
-    showIncidents,
-    incidents,
-    villages,
-    weights,
-    reliefCamps,
-    visibleVolunteers,
-    inspectedPoint,
-    villageSearchTerm,
-    searchQuery,
-  ]);
+  }, [inspectedPoint]);
+
+  // Sync Dedicated Focused Habitation / Village Pin
 
   // Sync Dedicated Focused Habitation / Village Pin (Lightweight, zero-rebuild on 370 background markers)
   useEffect(() => {
@@ -2053,18 +2128,8 @@ export const SimplifiedMapPage: React.FC = () => {
     setIsLocating(true);
     hasAutoCenteredRef.current = true;
     addToast({
-      title:
-        language === 'hi'
-          ? 'स्थान खोजा जा रहा है...'
-          : language === 'mr'
-            ? 'स्थान शोधत आहे...'
-            : 'Acquiring Live GPS Location...',
-      message:
-        language === 'hi'
-          ? 'सटीक जीपीएस/वाईफाई/नेटवर्क स्थान प्राप्त किया जा रहा है...'
-          : language === 'mr'
-            ? 'अचूक जीपीएस/वायफाय/नेटवर्क स्थान शोधले जात आहे...'
-            : 'Acquiring real live location coordinates and address in words...',
+      title: 'Acquiring Live GPS Location...',
+      message: 'Acquiring real live location coordinates and address in words...',
       type: 'info',
     });
     try {
@@ -2080,12 +2145,7 @@ export const SimplifiedMapPage: React.FC = () => {
           });
         }
         addToast({
-          title:
-            language === 'hi'
-              ? '🎯 लाइव स्थान प्राप्त हुआ'
-              : language === 'mr'
-                ? '🎯 थेट स्थान प्राप्त झाले'
-                : '🎯 Live Location Locked',
+          title: '🎯 Live Location Locked',
           message: `${res.shortAddressInWords || res.addressInWords || 'Detected'} (${res.lat.toFixed(5)}°N, ${res.lng.toFixed(5)}°E · ±${Math.round(res.accuracy)}m)`,
           type: 'success',
         });
@@ -2523,12 +2583,8 @@ export const SimplifiedMapPage: React.FC = () => {
         );
       }
       useAppStore.getState().showSingleToast({
-        title: language === 'hi' ? 'सभी अलर्ट स्तर' : language === 'mr' ? 'सर्व अलर्ट स्तर' : 'All Alert Tiers Active',
-        message: language === 'hi'
-          ? 'महाराष्ट्र के सभी आपदा और निगरानी क्षेत्र मानचित्र पर प्रदर्शित हैं'
-          : language === 'mr'
-            ? 'महाराष्ट्रातील सर्व आपत्ती व देखरेख क्षेत्रे नकाशावर दर्शवली आहेत'
-            : 'Displaying all active disaster & warning zones across Maharashtra',
+        title: 'All Alert Tiers Active',
+        message: 'Displaying all active disaster & warning zones across Maharashtra',
         type: 'info',
       });
       return;
@@ -2702,11 +2758,17 @@ export const SimplifiedMapPage: React.FC = () => {
 
     // 2. Smoothly fly and anchor on village coordinates
     if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      const distKm = haversineKm(center.lat, center.lng, v.lat, v.lng);
+      // Adaptive cinematic flight: pull back camera for long distances, glide directly for nearby hops
+      const flightZoom = distKm > 20 ? 13.5 : distKm > 5 ? 13.8 : Math.max(mapRef.current.getZoom(), 14.0);
+      const flightSpeed = distKm > 30 ? 1.3 : 1.1;
+
       mapRef.current.flyTo({
         center: [v.lng, v.lat],
-        zoom: Math.max(mapRef.current.getZoom(), 14.5),
-        speed: 1.15,
-        curve: 1.35,
+        zoom: flightZoom,
+        speed: flightSpeed,
+        curve: 1.42,
         essential: true,
       });
 
@@ -2819,8 +2881,15 @@ export const SimplifiedMapPage: React.FC = () => {
       `${v.name} · ${meta.zoneName} (${meta.score100}/100)`
     );
 
-    // Scroll to map smoothly
-    mapContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Scroll to map gently only if not already in view
+    const mapEl = mapContainerRef.current;
+    if (mapEl) {
+      const rect = mapEl.getBoundingClientRect();
+      const isInView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+      if (!isInView && (rect.top < -120 || rect.top > window.innerHeight * 0.7)) {
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
 
     useAppStore.getState().showSingleToast({
       title: `📍 ${v.name} (${v.taluka}, ${v.district})`,
@@ -3161,8 +3230,8 @@ export const SimplifiedMapPage: React.FC = () => {
               <LocateFixed className={`w-4 h-4 ${isLocating ? 'animate-spin' : 'animate-pulse'}`} strokeWidth={2} />
               <span>
                 {isLocating
-                  ? (language === 'hi' ? 'स्थान खोज रहे हैं...' : language === 'mr' ? 'स्थान शोधत आहे...' : 'Locating...')
-                  : (language === 'hi' ? '🎯 मेरा लाइव स्थान खोजें' : language === 'mr' ? '🎯 माझे थेट स्थान शोधा' : '🎯 Locate Live GPS')}
+                  ? 'Locating...'
+                  : '🎯 Locate Live GPS'}
               </span>
             </button>
 
@@ -3183,8 +3252,8 @@ export const SimplifiedMapPage: React.FC = () => {
               <span className={`w-2.5 h-2.5 rounded-full ${isLiveTracking && !selectedVillage ? 'bg-[#059669] animate-ping' : 'bg-amber-500'}`} />
               <span>
                 {isLiveTracking && !selectedVillage
-                  ? (language === 'hi' ? '🟢 लाइव ट्रैकिंग: सक्रिय' : language === 'mr' ? '🟢 थेट ट्रॅकिंग: सुरू' : '🟢 Live Tracking: ON')
-                  : (language === 'hi' ? '🎯 पुनः ट्रैक करें' : language === 'mr' ? '🎯 पुन्हा ट्रॅक करा' : '🎯 Follow Live GPS')}
+                  ? '🟢 Live Tracking: ON'
+                  : '🎯 Follow Live GPS'}
               </span>
             </button>
 
@@ -3200,11 +3269,7 @@ export const SimplifiedMapPage: React.FC = () => {
               <span>
                 {placingManualPin
                   ? 'Tap map to place pin...'
-                  : language === 'hi'
-                    ? 'पिन मैन्युअल रखें'
-                    : language === 'mr'
-                      ? 'पिन मॅन्युअली ठेवा'
-                      : 'Place pin manually'}
+                  : 'Place pin manually'}
               </span>
             </button>
 
@@ -3219,7 +3284,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 className="neu-btn px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 text-[#059669] shrink-0"
               >
                 <Plus className="w-4 h-4" strokeWidth={1.75} />
-                <span>{language === 'hi' ? 'अलर्ट ज़ोन जारी करें' : 'Issue Alert Zone'}</span>
+                <span>'Issue Alert Zone'</span>
               </button>
             )}
           </div>
@@ -3262,7 +3327,7 @@ export const SimplifiedMapPage: React.FC = () => {
                       });
                     }
                     addToast({
-                      title: language === 'hi' ? 'स्थान मिला' : language === 'mr' ? 'स्थान सापडले' : 'Location Found',
+                      title: 'Location Found',
                       message: `${top.displayName} (${top.lat.toFixed(5)}°N, ${top.lng.toFixed(5)}°E)`,
                       type: 'success',
                     });
@@ -3284,13 +3349,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 type="text"
                 value={quickSearchText}
                 onChange={(e) => setQuickSearchText(e.target.value)}
-                placeholder={
-                  language === 'hi'
-                    ? 'पता / स्थान खोजें...'
-                    : language === 'mr'
-                      ? 'पत्ता / ठिकाण शोधा...'
-                      : 'Search street / area / village...'
-                }
+                placeholder="Search street / area / village..."
                 className="text-xs bg-transparent border-none outline-none text-[#0F291E] dark:text-emerald-100 placeholder:text-gray-400 w-full"
               />
               {quickSearchText && (
@@ -3307,7 +3366,7 @@ export const SimplifiedMapPage: React.FC = () => {
                 disabled={isSearchingQuick || !quickSearchText.trim()}
                 className="px-2.5 py-1 rounded-[6px] bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold disabled:opacity-50 cursor-pointer shrink-0 transition-colors"
               >
-                {isSearchingQuick ? '...' : (language === 'hi' ? 'खोजें' : language === 'mr' ? 'शोधा' : 'Go')}
+                {isSearchingQuick ? '...' : 'Go'}
               </button>
             </form>
 
@@ -3389,9 +3448,7 @@ export const SimplifiedMapPage: React.FC = () => {
               Early Warning Tiers
             </span>
             <h2 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
-              {language === 'hi'
-                ? 'अलर्ट स्थिति (रेड · ऑरेंज · येलो · ग्रीन)'
-                : 'Alert Status (Red · Orange · Yellow · Green)'}
+              'Alert Status (Red · Orange · Yellow · Green)'
             </h2>
           </div>
           <div className="text-[11px] font-mono text-[var(--text-secondary)]">
@@ -3870,15 +3927,13 @@ export const SimplifiedMapPage: React.FC = () => {
             </div>
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
-                <span>{language === 'mr' ? 'आपत्तीप्रवण गावे व वस्त्या सूची' : language === 'hi' ? 'आपदा-संवेदनशील गाँव व बस्ती सूची' : 'Monitored Habitations & Villages Directory'}</span>
+                <span>Monitored Habitations & Villages Directory</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#E6F7F2] dark:bg-[#008060]/30 text-[#008060] dark:text-emerald-300">
                   {villages.length} Monitored
                 </span>
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {language === 'hi'
-                  ? 'सूची में से किसी भी गाँव पर क्लिक करें — मैप सीधे उस स्थान पर जाएगा और केवल उसका ज़ोन प्रदर्शित करेगा'
-                  : 'Click any village to fly directly to its place on the map without overcrowding all markers'}
+                'Click any village to fly directly to its place on the map without overcrowding all markers'
               </p>
             </div>
           </div>
@@ -3996,11 +4051,7 @@ export const SimplifiedMapPage: React.FC = () => {
                           <div className="font-bold text-xs sm:text-[13px] text-[#0F172A] dark:text-white leading-tight">
                             {v.name}
                           </div>
-                          {(v.nameHi || v.nameMr) && (
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                              {language === 'mr' ? v.nameMr : v.nameHi}
-                            </div>
-                          )}
+                          
                         </div>
 
                         <span
@@ -4128,42 +4179,76 @@ export const SimplifiedMapPage: React.FC = () => {
 
           <div className="h-4 w-px bg-slate-200 dark:bg-[#1E3A5F] mx-0.5" />
 
-          {/* 3D DEM Terrain Button */}
+          {/* Explicit 2D View Button */}
           <button
             type="button"
-            onClick={() => setIs3D((v) => !v)}
+            onClick={() => setIs3D(false)}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+              !is3D
+                ? 'bg-[#008060] text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
+            }`}
+            title="2D Standard Planar View (Flat Pitch 0°)"
+          >
+            <MapIcon className="w-3.5 h-3.5" />
+            <span>2D</span>
+          </button>
+
+          {/* Explicit 3D DEM Terrain Button */}
+          <button
+            type="button"
+            onClick={() => setIs3D(true)}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
               is3D
                 ? 'bg-[#0B1F33] text-[#38BDF8] border border-[#38BDF8]/40 shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
-            title="Toggle 3D Elevation Terrain Model (AWS Terrarium DEM)"
+            title="3D Elevation Terrain Model (AWS Terrarium DEM)"
           >
             <Orbit className="w-3.5 h-3.5" />
-            <span>{is3D ? '3D DEM' : '2D'}</span>
+            <span>3D DEM</span>
           </button>
 
           {is3D && (
-            <button
-              type="button"
-              onClick={() => {
-                if (mapRef.current) {
-                  mapRef.current.easeTo({
-                    bearing: (mapRef.current.getBearing() + 45) % 360,
-                    duration: 350,
-                  });
-                }
-              }}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#0B8F80] hover:bg-slate-100 dark:hover:bg-[#172F46] flex items-center gap-1 cursor-pointer transition-all"
-              title="Rotate 3D camera 45°"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Rotate</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (mapRef.current) {
+                    mapRef.current.easeTo({
+                      bearing: (mapRef.current.getBearing() + 45) % 360,
+                      duration: 350,
+                    });
+                  }
+                }}
+                className="px-2 py-1.5 rounded-xl text-xs font-bold text-[#0B8F80] hover:bg-slate-100 dark:hover:bg-[#172F46] flex items-center gap-1 cursor-pointer transition-all"
+                title="Rotate 3D camera 45°"
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>Rotate 45°</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (mapRef.current) {
+                    mapRef.current.easeTo({
+                      pitch: 58,
+                      bearing: 0,
+                      duration: 350,
+                    });
+                  }
+                }}
+                className="px-2 py-1.5 rounded-xl text-xs font-bold text-[#0B8F80] hover:bg-slate-100 dark:hover:bg-[#172F46] flex items-center gap-1 cursor-pointer transition-all"
+                title="Reset to North facing 3D view"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>North</span>
+              </button>
+            </>
           )}
         </div>
 
-        {/* Mobile 4-Basemap Quick Bar */}
+        {/* Mobile 4-Basemap + 2D/3D Quick Bar */}
         <div className="absolute top-14 left-3 z-10 md:hidden flex items-center p-0.5 rounded-xl bg-white/95 dark:bg-[#101C2C]/95 backdrop-blur-md border border-slate-200 dark:border-[#1E3A5F] shadow-md gap-0.5 text-[10px]">
           <button
             type="button"
@@ -4208,14 +4293,24 @@ export const SimplifiedMapPage: React.FC = () => {
           <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 mx-0.5" />
           <button
             type="button"
-            onClick={() => setIs3D((v) => !v)}
+            onClick={() => setIs3D(false)}
+            className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${
+              !is3D ? 'bg-[#008060] text-white' : 'text-slate-600 dark:text-slate-300'
+            }`}
+            title="2D Standard View"
+          >
+            <span>2D</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIs3D(true)}
             className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${
               is3D ? 'bg-[#0B1F33] text-[#38BDF8] border border-[#38BDF8]/40' : 'text-slate-600 dark:text-slate-300'
             }`}
-            title="Toggle 3D Elevation Terrain Model (AWS Terrarium DEM)"
+            title="3D Elevation Terrain Model (AWS Terrarium DEM)"
           >
             <Orbit className="w-3 h-3" />
-            <span>{is3D ? '3D' : '2D'}</span>
+            <span>3D</span>
           </button>
         </div>
 
@@ -4285,13 +4380,7 @@ export const SimplifiedMapPage: React.FC = () => {
 
                 setSearchResults(liveMatches);
               }}
-              placeholder={
-                language === 'hi'
-                  ? 'कोई भी गाँव, तालुका, खतरा या स्थान खोजें...'
-                  : language === 'mr'
-                    ? 'कोणतेही गाव, तालुका, धोका किंवा ठिकाण शोधा...'
-                    : 'Search any village, taluka, hazard, or place...'
-              }
+              placeholder="Search any village, taluka, hazard, or place..."
               className="bg-transparent text-xs flex-1 focus:outline-none text-[var(--text-primary)]"
             />
             {searchQuery && (
@@ -4310,7 +4399,7 @@ export const SimplifiedMapPage: React.FC = () => {
               type="submit"
               className="px-2.5 py-1 rounded-[6px] bg-[#0B8F80] hover:bg-[#097b6e] text-white text-[11px] font-bold cursor-pointer transition-colors"
             >
-              {isSearching ? '...' : (language === 'hi' ? 'खोजें' : language === 'mr' ? 'शोधा' : 'Go')}
+              {isSearching ? '...' : 'Go'}
             </button>
           </form>
 
@@ -4715,7 +4804,7 @@ export const SimplifiedMapPage: React.FC = () => {
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs">
             <MapPin className="w-3.5 h-3.5 text-[#059669] shrink-0" />
             <span className="font-bold text-[#059669] text-[11px]">
-              {language === 'hi' ? 'स्थान (शब्दों में):' : language === 'mr' ? 'स्थान (शब्दांत):' : 'Location (In Words):'}
+              'Location (In Words):'
             </span>
             <span className="font-semibold text-[var(--text-primary)] text-xs">
               {gps.shortAddressInWords || gps.addressInWords}
@@ -5309,9 +5398,7 @@ export const SimplifiedMapPage: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold text-[var(--text-primary)]">
-              {language === 'hi'
-                ? 'आपके वर्तमान स्थान के निकटतम 3 उपलब्ध आश्रय'
-                : 'Nearest 3 Available Shelters for Your Current Location'}
+              'Nearest 3 Available Shelters for Your Current Location'
             </h2>
             <p className="text-xs text-[var(--text-secondary)]">
               Sorted by distance from your GPS coordinate ({gps.lat.toFixed(4)}°N, {gps.lng.toFixed(4)}°E)
