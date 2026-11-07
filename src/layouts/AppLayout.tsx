@@ -54,6 +54,7 @@ import { GooeyMenu } from '../components/GooeyMenu';
 import { KebabMenu } from '../components/KebabMenu';
 import { SlidePanel } from '../components/SlidePanel';
 import { PageTransition } from '../components/PageTransition';
+import { Nivaran247AiChatbot } from '../components/Nivaran247AiChatbot';
 
 interface NavTabItem {
   to: string;
@@ -1424,6 +1425,9 @@ export const AppLayout: React.FC = () => {
       <EmergencySosModal />
       <ExplainScoreModal />
       <ToastContainer />
+
+      {/* 24/7 AI Disaster Emergency Assistant Chatbot */}
+      <Nivaran247AiChatbot />
     </>
   );
 };

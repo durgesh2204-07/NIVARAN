@@ -1310,78 +1310,102 @@ export const SimplifiedMapPage: React.FC = () => {
   // Sync Basemap (Street vs Satellite with Hybrid Labels vs Topo vs Dark) and 2D/3D Terrain + GIS Vector Layer Visibilities
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
 
-    if (map.getLayer('basemap-street')) {
-      map.setLayoutProperty(
-        'basemap-street',
-        'visibility',
-        basemapMode === 'street' ? 'visible' : 'none'
-      );
-    }
-    if (map.getLayer('basemap-satellite')) {
-      map.setLayoutProperty(
-        'basemap-satellite',
-        'visibility',
-        basemapMode === 'satellite' ? 'visible' : 'none'
-      );
-    }
-    if (map.getLayer('basemap-satellite-roads')) {
-      map.setLayoutProperty(
-        'basemap-satellite-roads',
-        'visibility',
-        basemapMode === 'satellite' ? 'visible' : 'none'
-      );
-    }
-    if (map.getLayer('basemap-satellite-labels')) {
-      map.setLayoutProperty(
-        'basemap-satellite-labels',
-        'visibility',
-        basemapMode === 'satellite' ? 'visible' : 'none'
-      );
-    }
-    if (map.getLayer('basemap-topo')) {
-      map.setLayoutProperty(
-        'basemap-topo',
-        'visibility',
-        basemapMode === 'topo' ? 'visible' : 'none'
-      );
-    }
-    if (map.getLayer('basemap-dark')) {
-      map.setLayoutProperty(
-        'basemap-dark',
-        'visibility',
-        basemapMode === 'dark' ? 'visible' : 'none'
-      );
-    }
+    const applyBasemapConfig = () => {
+      if (map.getLayer('basemap-street')) {
+        map.setLayoutProperty(
+          'basemap-street',
+          'visibility',
+          basemapMode === 'street' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('basemap-satellite')) {
+        map.setLayoutProperty(
+          'basemap-satellite',
+          'visibility',
+          basemapMode === 'satellite' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('basemap-satellite-roads')) {
+        map.setLayoutProperty(
+          'basemap-satellite-roads',
+          'visibility',
+          basemapMode === 'satellite' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('basemap-satellite-labels')) {
+        map.setLayoutProperty(
+          'basemap-satellite-labels',
+          'visibility',
+          basemapMode === 'satellite' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('basemap-topo')) {
+        map.setLayoutProperty(
+          'basemap-topo',
+          'visibility',
+          basemapMode === 'topo' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('basemap-dark')) {
+        map.setLayoutProperty(
+          'basemap-dark',
+          'visibility',
+          basemapMode === 'dark' ? 'visible' : 'none'
+        );
+      }
+      if (map.getLayer('map-solid-background')) {
+        map.setPaintProperty(
+          'map-solid-background',
+          'background-color',
+          basemapMode === 'dark' ? '#090D14' : basemapMode === 'topo' ? '#EBF0E6' : '#0F1E2E'
+        );
+      }
 
-    if (map.getLayer('cwc-rivers-gis-line')) {
-      map.setLayoutProperty(
-        'cwc-rivers-gis-line',
-        'visibility',
-        showRiverHydrology ? 'visible' : 'none'
-      );
-      map.setLayoutProperty(
-        'cwc-rivers-gis-casing',
-        'visibility',
-        showRiverHydrology ? 'visible' : 'none'
-      );
-    }
+      if (map.getLayer('cwc-rivers-gis-line')) {
+        map.setLayoutProperty(
+          'cwc-rivers-gis-line',
+          'visibility',
+          showRiverHydrology ? 'visible' : 'none'
+        );
+        map.setLayoutProperty(
+          'cwc-rivers-gis-casing',
+          'visibility',
+          showRiverHydrology ? 'visible' : 'none'
+        );
+      }
 
-    if (map.getLayer('gsi-faults-gis-line')) {
-      map.setLayoutProperty(
-        'gsi-faults-gis-line',
-        'visibility',
-        showGsiFaultLines ? 'visible' : 'none'
-      );
-    }
+      if (map.getLayer('gsi-faults-gis-line')) {
+        map.setLayoutProperty(
+          'gsi-faults-gis-line',
+          'visibility',
+          showGsiFaultLines ? 'visible' : 'none'
+        );
+      }
 
-    if (is3D) {
-      map.setTerrain({ source: 'terrarium_dem', exaggeration: 1.4 });
-      map.easeTo({ pitch: 62, duration: 500 });
+      if (is3D) {
+        try {
+          map.setTerrain({ source: 'terrarium_dem', exaggeration: 1.4 });
+          map.easeTo({ pitch: 62, duration: 500 });
+        } catch {
+          // Ignore if DEM source not ready
+        }
+      } else {
+        try {
+          map.setTerrain(null);
+          map.easeTo({ pitch: 0, bearing: 0, duration: 450 });
+        } catch {
+          // Ignore
+        }
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      applyBasemapConfig();
     } else {
-      map.setTerrain(null);
-      map.easeTo({ pitch: 0, bearing: 0, duration: 450 });
+      map.once('load', applyBasemapConfig);
+      map.once('styledata', applyBasemapConfig);
     }
   }, [basemapMode, is3D, showRiverHydrology, showGsiFaultLines]);
 
