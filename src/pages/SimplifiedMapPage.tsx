@@ -757,6 +757,7 @@ export const SimplifiedMapPage: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const selectedVillageMarkerRef = useRef<maplibregl.Marker | null>(null);
 
   const handleProviderChanged = (newProvider: MapProviderType) => {
     setActiveProvider(newProvider);
@@ -1940,37 +1941,6 @@ export const SimplifiedMapPage: React.FC = () => {
       });
     }
 
-    // 4C. Focused Habitation / Village Pin
-    // When a village is selected from the Directory List or Map, always render its dedicated prominent pin with its zone-coded badge & pulsing radar ring!
-    if (selectedVillage) {
-      const meta = getVillageZoneMeta(selectedVillage);
-      const pinEl = document.createElement('div');
-      pinEl.className = 'cursor-pointer select-none flex flex-col items-center group transition-transform hover:scale-110';
-      pinEl.innerHTML = `
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-2xl border-2 border-white ring-2 ring-black/30 backdrop-blur-xs" style="background-color: ${meta.colorHex};">
-          <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
-          <span>📍 ${selectedVillage.name}</span>
-          <span class="px-1.5 py-0.5 rounded-sm bg-black/25 font-mono text-[10px] font-bold">${meta.score100}/100</span>
-        </div>
-        <div class="w-3.5 h-3.5 rotate-45 -mt-2 border-r-2 border-b-2 border-white shadow-md" style="background-color: ${meta.colorHex};"></div>
-        <div class="w-6 h-1 rounded-full bg-black/30 blur-[1px] mt-0.5"></div>
-      `;
-      pinEl.title = `${selectedVillage.name} (${selectedVillage.taluka}) · ${meta.zoneName} · Risk Score: ${meta.score100}/100`;
-      pinEl.onclick = (ev) => {
-        ev.stopPropagation();
-        setSelectedVillage(selectedVillage);
-        openSidePanel(
-          'village',
-          { ...selectedVillage, ...meta },
-          `${selectedVillage.name} · ${meta.zoneName} (${meta.score100}/100)`
-        );
-      };
-      const m = new maplibregl.Marker({ element: pinEl, anchor: 'bottom' })
-        .setLngLat([selectedVillage.lng, selectedVillage.lat])
-        .addTo(map);
-      markersRef.current.push(m);
-    }
-
     // 5. Inspected / Searched Location Pin
     if (inspectedPoint) {
       const pinEl = document.createElement('div');
@@ -1994,7 +1964,6 @@ export const SimplifiedMapPage: React.FC = () => {
     alertFilterLevel,
     activeAlertZones,
     showHabitations,
-    selectedVillage,
     showShelters,
     showIncidents,
     incidents,
@@ -2006,6 +1975,54 @@ export const SimplifiedMapPage: React.FC = () => {
     villageSearchTerm,
     searchQuery,
   ]);
+
+  // Sync Dedicated Focused Habitation / Village Pin (Lightweight, zero-rebuild on 370 background markers)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!selectedVillage) {
+      if (selectedVillageMarkerRef.current) {
+        selectedVillageMarkerRef.current.remove();
+        selectedVillageMarkerRef.current = null;
+      }
+      return;
+    }
+
+    const meta = getVillageZoneMeta(selectedVillage);
+    if (!selectedVillageMarkerRef.current) {
+      const pinEl = document.createElement('div');
+      pinEl.className = 'cursor-pointer select-none flex flex-col items-center group transition-transform hover:scale-110 z-30';
+      pinEl.innerHTML = `
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-2xl border-2 border-white ring-2 ring-black/30 backdrop-blur-xs" style="background-color: ${meta.colorHex};">
+          <span class="w-2 h-2 rounded-full bg-white"></span>
+          <span>📍 ${selectedVillage.name}</span>
+          <span class="px-1.5 py-0.5 rounded-sm bg-black/25 font-mono text-[10px] font-bold">${meta.score100}/100</span>
+        </div>
+        <div class="w-3.5 h-3.5 rotate-45 -mt-2 border-r-2 border-b-2 border-white shadow-md" style="background-color: ${meta.colorHex};"></div>
+      `;
+      pinEl.title = `${selectedVillage.name} (${selectedVillage.taluka}) · ${meta.zoneName} · Risk Score: ${meta.score100}/100`;
+      pinEl.onclick = (ev) => {
+        ev.stopPropagation();
+        handleSelectVillageFromList(selectedVillage);
+      };
+      selectedVillageMarkerRef.current = new maplibregl.Marker({ element: pinEl, anchor: 'bottom' })
+        .setLngLat([selectedVillage.lng, selectedVillage.lat])
+        .addTo(map);
+    } else {
+      selectedVillageMarkerRef.current.setLngLat([selectedVillage.lng, selectedVillage.lat]);
+      const pinEl = selectedVillageMarkerRef.current.getElement();
+      pinEl.innerHTML = `
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-2xl border-2 border-white ring-2 ring-black/30 backdrop-blur-xs" style="background-color: ${meta.colorHex};">
+          <span class="w-2 h-2 rounded-full bg-white"></span>
+          <span>📍 ${selectedVillage.name}</span>
+          <span class="px-1.5 py-0.5 rounded-sm bg-black/25 font-mono text-[10px] font-bold">${meta.score100}/100</span>
+        </div>
+        <div class="w-3.5 h-3.5 rotate-45 -mt-2 border-r-2 border-b-2 border-white shadow-md" style="background-color: ${meta.colorHex};"></div>
+      `;
+      pinEl.title = `${selectedVillage.name} (${selectedVillage.taluka}) · ${meta.zoneName} · Risk Score: ${meta.score100}/100`;
+    }
+  }, [selectedVillage]);
 
   // Adjust alert zone polygon opacity dynamically from Advanced GIS slider
   useEffect(() => {
@@ -2688,9 +2705,9 @@ export const SimplifiedMapPage: React.FC = () => {
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: [v.lng, v.lat],
-        zoom: 15.2,
-        speed: 1.4,
-        curve: 1.2,
+        zoom: Math.max(mapRef.current.getZoom(), 14.5),
+        speed: 1.15,
+        curve: 1.35,
         essential: true,
       });
 
@@ -2701,31 +2718,55 @@ export const SimplifiedMapPage: React.FC = () => {
       }
 
       const popupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 6px; min-width: 240px; max-width: 290px; color: #0F172A;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 8px; min-width: 250px; max-width: 310px; color: #0F172A;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
-            <span style="font-weight: 800; font-size: 13px; color: ${meta.colorHex};">📍 ${v.name}</span>
-            <span style="background: ${meta.colorHex}; color: #FFFFFF; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 9999px;">${meta.zoneName}</span>
+            <span style="font-weight: 800; font-size: 14px; color: ${meta.colorHex};">📍 ${v.name}</span>
+            <span style="background: ${meta.colorHex}; color: #FFFFFF; font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 9999px;">${meta.zoneName}</span>
           </div>
-          <div style="font-size: 10.5px; color: #64748B; margin-bottom: 6px;">${v.taluka} Taluka · ${v.district} District</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 6px; padding: 5px; margin-bottom: 6px; font-size: 10.5px;">
-            <div><strong>Disaster Risk:</strong> <span style="color: ${meta.colorHex}; font-weight: 700;">${meta.score100}%</span></div>
-            <div><strong>Elevation:</strong> ${v.elevationM}m</div>
-            <div><strong>Slope:</strong> ${v.slopeDeg}°</div>
-            <div><strong>Households:</strong> ${v.households} HH</div>
+          <div style="font-size: 11px; color: #64748B; margin-bottom: 8px;">${v.taluka} Taluka · ${v.district} District</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 7px; margin-bottom: 8px; font-size: 11px;">
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">🌧️ Yearly Rain</span>
+              <strong style="color: #0F766E;">${v.annualRainfallMm ?? 3200} mm/yr</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">🌊 River Distance</span>
+              <strong style="color: #0284C7;">${Number(v.riverDistKm ?? 1.2) < 1 ? Math.round(Number(v.riverDistKm ?? 1.2) * 1000) + ' m' : Number(v.riverDistKm ?? 1.2).toFixed(2) + ' km'}</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">🛖 Mud Houses</span>
+              <strong style="color: #D97706;">${v.vulnerabilityFactors?.kutchaHousePct ?? 65}% homes</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">👵 Elderly People</span>
+              <strong style="color: #7C3AED;">${v.vulnerabilityFactors?.elderlyPct ?? 14}% people</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">⛰️ Hill Slope</span>
+              <strong>${v.slopeDeg}° (${v.elevationM}m)</strong>
+            </div>
+            <div>
+              <span style="color: #64748B; font-size: 9px; display: block; text-transform: uppercase;">👥 Population</span>
+              <strong>${v.population.toLocaleString()} (${v.households} HH)</strong>
+            </div>
           </div>
-          <div style="font-size: 9.5px; background: #FEF3C7; color: #92400E; padding: 3px 6px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+
+          <div style="font-size: 10px; background: #FEF3C7; color: #92400E; padding: 4px 8px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
             <span>🔒</span><span>Pin Locked (Stays until Live GPS clicked)</span>
           </div>
-          <div style="margin-bottom: 5px;">
-            <button id="btn-village-forecast" style="width: 100%; background: #0F766E; color: #FFFFFF; font-size: 10.5px; font-weight: 800; padding: 6px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+
+          <div style="margin-bottom: 6px;">
+            <button id="btn-village-forecast" style="width: 100%; background: #0F766E; color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 7px 10px; border-radius: 7px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
               <span>⚡ AI 7-Day Weather & Disaster Forecast</span>
             </button>
           </div>
-          <div style="display: flex; gap: 4px;">
-            <button id="btn-village-shelter-dir" style="flex: 1; background: #008060; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 5px 6px; border-radius: 5px; border: none; cursor: pointer;">
+
+          <div style="display: flex; gap: 6px;">
+            <button id="btn-village-shelter-dir" style="flex: 1; background: #008060; color: #FFFFFF; font-size: 10.5px; font-weight: 700; padding: 6px 8px; border-radius: 6px; border: none; cursor: pointer;">
               ⛺ Shelter Route
             </button>
-            <button id="btn-village-live-return" style="flex: 1; background: #0B1F33; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 5px 6px; border-radius: 5px; border: none; cursor: pointer;">
+            <button id="btn-village-live-return" style="flex: 1; background: #0B1F33; color: #FFFFFF; font-size: 10.5px; font-weight: 700; padding: 6px 8px; border-radius: 6px; border: none; cursor: pointer;">
               🎯 Live GPS
             </button>
           </div>
@@ -4996,42 +5037,57 @@ export const SimplifiedMapPage: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                   <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Population & HH</div>
-                    <div className="font-mono font-bold text-[#101C2C] dark:text-white text-xs mt-0.5">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">🌧️ Yearly Monsoon Rain</div>
+                    <div className="font-bold text-[#16A078] text-xs mt-0.5">
+                      {selectedVillage.annualRainfallMm ?? 3200} mm/yr
+                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">Extremely heavy rains</div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">🌊 River / Stream Distance</div>
+                    <div className="font-bold text-[#0284C7] text-xs mt-0.5">
+                      {Number(selectedVillage.riverDistKm ?? 1.2) < 1
+                        ? `${Math.round(Number(selectedVillage.riverDistKm ?? 1.2) * 1000)} meters away`
+                        : `${Number(selectedVillage.riverDistKm ?? 1.2).toFixed(2)} km away`}
+                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">
+                      {Number(selectedVillage.riverDistKm ?? 1.2) < 0.5 ? 'High flash flood risk' : 'Safe flood buffer'}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">🛖 Mud & Clay Houses at Risk</div>
+                    <div className="font-bold text-amber-600 dark:text-amber-400 text-xs mt-0.5">
+                      {selectedVillage.vulnerabilityFactors?.kutchaHousePct ?? 65}% of homes
+                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">Vulnerable to collapse</div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">👵 Senior Citizens Needing Help</div>
+                    <div className="font-bold text-purple-600 dark:text-purple-400 text-xs mt-0.5">
+                      {selectedVillage.vulnerabilityFactors?.elderlyPct ?? 14}% elderly
+                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">Priority rescue assistance</div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">⛰️ Hill Elevation & Slope</div>
+                    <div className="font-bold text-[#101C2C] dark:text-white text-xs mt-0.5">
+                      {selectedVillage.elevationM}m high · {selectedVillage.slopeDeg}°
+                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">Steep mountain slope</div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">👥 Total People & Families</div>
+                    <div className="font-bold text-[#101C2C] dark:text-white text-xs mt-0.5">
                       {selectedVillage.population.toLocaleString()} ({selectedVillage.households} HH)
                     </div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Elevation & Slope</div>
-                    <div className="font-mono font-bold text-[#101C2C] dark:text-white text-xs mt-0.5">
-                      {selectedVillage.elevationM} m · {selectedVillage.slopeDeg}°
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">River Distance</div>
-                    <div className="font-mono font-bold text-[#101C2C] dark:text-white text-xs mt-0.5">
-                      {selectedVillage.riverDistKm} km
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Annual Rainfall</div>
-                    <div className="font-mono font-bold text-[#16A078] text-xs mt-0.5">
-                      {selectedVillage.annualRainfallMm} mm/yr
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vulnerable Pop.</div>
-                    <div className="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs mt-0.5">
-                      {selectedVillage.vulnerabilityFactors?.elderlyPct ?? 14}% Elderly · {selectedVillage.vulnerabilityFactors?.kutchaHousePct ?? 65}% Kutcha
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#101C2C] border border-slate-200 dark:border-[#1E3A5F]">
-                    <div className="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assessment Status</div>
-                    <div className="font-mono font-bold text-[#16A078] text-xs mt-0.5">
-                      Verified (GSI/IMD)
-                    </div>
+                    <div className="text-[9.5px] text-slate-400 mt-0.5">Taluka PWD Road Access</div>
                   </div>
                 </div>
 

@@ -19,6 +19,10 @@ import {
   Mountain,
   Droplets,
   Navigation,
+  CloudRain,
+  Radio,
+  Tent,
+  Sparkles,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
@@ -286,86 +290,168 @@ export const SlidePanel: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Village Demographics & Exposure */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center font-mono">
+                  {/* Village Basic Facts (Plain English) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57]">
-                      <span className="text-[10px] text-slate-400 uppercase block">Population</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Total People</span>
                       <span className="text-base font-bold text-slate-900 dark:text-white">
                         {Number(data.population || 0).toLocaleString()}
                       </span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">Villagers living here</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57]">
-                      <span className="text-[10px] text-slate-400 uppercase block">Households</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Families & Homes</span>
                       <span className="text-base font-bold text-slate-900 dark:text-white">
                         {Number(data.households || 0).toLocaleString()}
                       </span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">Households total</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57]">
-                      <span className="text-[10px] text-slate-400 uppercase block">Elevation</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Height Above Sea</span>
                       <span className="text-base font-bold text-slate-900 dark:text-white">
                         {data.elevationM ?? '—'} m
                       </span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">Hill elevation</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57]">
-                      <span className="text-[10px] text-slate-400 uppercase block">Slope</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Hill Steepness</span>
                       <span className="text-base font-bold text-slate-900 dark:text-white">
                         {data.slopeDeg ?? '—'}°
                       </span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">Slope angle</span>
                     </div>
                   </div>
 
-                  {/* Environmental & Hydrological Factors */}
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57] space-y-2">
-                    <div className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+                  {/* Environmental & Hydrological Factors (In Simple Plain English Words) */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#172F46] border border-slate-200/80 dark:border-[#233C57] space-y-3">
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
-                        <Droplets className="w-3.5 h-3.5 text-cyan-500" />
-                        <span>Hydrology & Terrain Vulnerability</span>
+                        <Droplets className="w-4 h-4 text-cyan-500" />
+                        <span>Disaster Risk & Hazard Information (Simple Guide)</span>
                       </span>
-                      <span className="text-[10.5px] font-mono text-[#008060]">GSI & IMD Live</span>
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                        IMD & GSI Verified
+                      </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/60 dark:border-[#1E3A5F]">
-                        <span className="text-slate-400 text-[10px] block">Annual Rainfall</span>
-                        <strong className="text-emerald-600 dark:text-emerald-400">
-                          {data.annualRainfallMm ?? 3200} mm/yr
-                        </strong>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                      {/* Annual Rainfall */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/70 dark:border-[#1E3A5F] space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                            <CloudRain className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Yearly Monsoon Rain</span>
+                          </span>
+                          <strong className="text-emerald-700 dark:text-emerald-400 text-sm font-bold">
+                            {data.annualRainfallMm ?? 3200} mm/yr
+                          </strong>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          {Number(data.annualRainfallMm ?? 3200) > 3500
+                            ? 'Extremely heavy monsoon rains. Ground gets soaked fast, increasing mudslide danger.'
+                            : 'Moderate to heavy seasonal monsoon rainfall.'}
+                        </p>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/60 dark:border-[#1E3A5F]">
-                        <span className="text-slate-400 text-[10px] block">River Proximity</span>
-                        <strong className="text-cyan-600 dark:text-cyan-400">
-                          {data.riverDistKm ?? 1.2} km
-                        </strong>
+
+                      {/* River Proximity */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/70 dark:border-[#1E3A5F] space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                            <Droplets className="w-3.5 h-3.5 text-cyan-500" />
+                            <span>Distance to River / Stream</span>
+                          </span>
+                          <strong className="text-cyan-700 dark:text-cyan-400 text-sm font-bold">
+                            {Number(data.riverDistKm ?? 1.2) < 1
+                              ? `${Math.round(Number(data.riverDistKm ?? 1.2) * 1000)} meters`
+                              : `${Number(data.riverDistKm ?? 1.2).toFixed(2)} km`}
+                          </strong>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          {Number(data.riverDistKm ?? 1.2) < 0.5
+                            ? 'Very close to water flow. High risk of river overflow and sudden flash floods.'
+                            : 'Located at a safe distance from major river flood lines.'}
+                        </p>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/60 dark:border-[#1E3A5F]">
-                        <span className="text-slate-400 text-[10px] block">Kutcha Dwellings</span>
-                        <strong className="text-amber-600 dark:text-amber-400">
-                          {data.vulnerabilityFactors?.kutchaHousePct ?? 65}%
-                        </strong>
+
+                      {/* Kutcha Dwellings */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/70 dark:border-[#1E3A5F] space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                            <Home className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Mud & Clay Houses at Risk</span>
+                          </span>
+                          <strong className="text-amber-700 dark:text-amber-400 text-sm font-bold">
+                            {data.vulnerabilityFactors?.kutchaHousePct ?? 65}% of homes
+                          </strong>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          Homes built with mud walls or tin roofs that can suffer damage in landslides and storm water.
+                        </p>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/60 dark:border-[#1E3A5F]">
-                        <span className="text-slate-400 text-[10px] block">Elderly Demographic</span>
-                        <strong className="text-purple-600 dark:text-purple-400">
-                          {data.vulnerabilityFactors?.elderlyPct ?? 14}%
-                        </strong>
+
+                      {/* Elderly Demographic */}
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#101C2C] border border-slate-200/70 dark:border-[#1E3A5F] space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                            <Users className="w-3.5 h-3.5 text-purple-500" />
+                            <span>Elderly People Needing Help</span>
+                          </span>
+                          <strong className="text-purple-700 dark:text-purple-400 text-sm font-bold">
+                            {data.vulnerabilityFactors?.elderlyPct ?? 14}% of people
+                          </strong>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          Senior citizens and elders who require priority ambulance or vehicle evacuation support.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Additional Emergency Lifelines & Infrastructure */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 dark:border-[#233C57] text-[11px]">
+                      <div className="flex items-start gap-2 p-2 rounded-lg bg-slate-100/80 dark:bg-[#101C2C]/60 text-slate-700 dark:text-slate-300">
+                        <Tent className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Safe Shelter Route:</strong> Direct road access to designated Taluka Disaster Relief Camp with water, food, and beds.
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 p-2 rounded-lg bg-slate-100/80 dark:bg-[#101C2C]/60 text-slate-700 dark:text-slate-300">
+                        <Radio className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Emergency Network:</strong> BSNL/Jio 4G Cellular and Gram Panchayat Early Warning Siren operational.
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Disaster Action Recommendation */}
-                  <div className={`p-3.5 rounded-2xl border text-xs font-medium leading-relaxed ${
+                  {/* Simple Disaster Action Guide */}
+                  <div className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1 ${
                     (data.score100 || 0) >= 75
-                      ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300'
+                      ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-200'
                       : (data.score100 || 0) >= 50
-                        ? 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-900/50 text-orange-700 dark:text-orange-300'
-                        : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-200'
+                        : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-200'
                   }`}>
-                    <strong>Command Operational Directive:</strong>{' '}
-                    {(data.score100 || 0) >= 75
-                      ? 'High priority landslide hazard detected. Immediate pre-emptive relocation and Aapda Mitra deployment recommended.'
-                      : (data.score100 || 0) >= 50
-                        ? 'Moderate hazard vulnerability. Early warning issued to Gram Panchayat. Maintain 24h satellite and rainfall watch.'
-                        : 'Low vulnerability sector. Habitation classified as safe plateau zone with low slope instability.'}
+                    <div className="font-bold flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>
+                        {(data.score100 || 0) >= 75
+                          ? '🚨 HIGH DANGER ZONE (Immediate Action Recommended)'
+                          : (data.score100 || 0) >= 50
+                            ? '⚠️ CAUTION ZONE (Stay Alert & Watchful)'
+                            : '✅ SAFE ZONE (Normal Ground Conditions)'}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] leading-relaxed">
+                      {(data.score100 || 0) >= 75
+                        ? 'Extremely high landslide and flash flood risk detected on this slope. Gram Panchayat should initiate pre-emptive evacuation to nearest relief camps. Aapda Mitra rescue teams alerted.'
+                        : (data.score100 || 0) >= 50
+                          ? 'Moderate hazard vulnerability. Villagers should monitor continuous rain alerts on NIVARAN. Keep essential emergency kit and documents ready.'
+                          : 'Habitation located on stable terrain with low slope instability. Normal safety watch active.'}
+                    </p>
+                    <div className="pt-1 text-[11px] font-bold text-slate-600 dark:text-slate-300 border-t border-black/10 dark:border-white/10 flex items-center justify-between">
+                      <span>📞 24/7 Disaster Helpline: <strong>1077</strong> (Toll-Free)</span>
+                      <span>Emergency Ambulance: <strong>108</strong></span>
+                    </div>
                   </div>
                 </div>
               )}

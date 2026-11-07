@@ -50,7 +50,6 @@ import { VoiceAlertButton, VoiceAlertModal } from '../components/VoiceAlertModal
 import { EmergencySosButton, EmergencySosModal } from '../components/EmergencySosModal';
 import { LeftNavigationPanel } from './LeftNavigationPanel';
 import { NotificationCenterPopover } from '../components/NotificationCenterPopover';
-import { GooeyMenu } from '../components/GooeyMenu';
 import { KebabMenu } from '../components/KebabMenu';
 import { SlidePanel } from '../components/SlidePanel';
 import { PageTransition } from '../components/PageTransition';
@@ -1412,9 +1411,6 @@ export const AppLayout: React.FC = () => {
         })}
       </nav>
       </div>
-
-      {/* Floating Push-Back Gooey Menu (Outside main-app-content so it is never trapped or blocked) */}
-      <GooeyMenu />
 
       {/* Reusable Slide-In Side Panel */}
       <SlidePanel />

@@ -378,31 +378,35 @@ export const Nivaran247AiChatbot: React.FC = () => {
   return (
     <>
       {/* =====================================================================
-          PERSISTENT 24/7 FLOATING AI CHATBOT TRIGGER BUTTON
+          PERSISTENT 24/7 FLOATING AI ASSISTANT TRIGGER BUTTON (ATTRACTIVE & CLEAN)
           ===================================================================== */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-[999] flex flex-col items-end gap-2 select-none pointer-events-auto animate-bounce-subtle">
+        <div className="fixed bottom-6 right-6 z-[999] pointer-events-auto select-none">
           <button
             type="button"
             onClick={() => {
               setIsOpen(true);
               setIsMinimized(false);
             }}
-            className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900 text-white shadow-2xl hover:shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-emerald-400/50 cursor-pointer"
-            aria-label="Open 24/7 AI Emergency Chatbot"
+            className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#091422]/95 hover:bg-[#0D1C2E] text-white shadow-2xl hover:shadow-[#0B8F80]/30 transition-all duration-200 border border-[#0B8F80]/50 hover:border-[#14B8A6] cursor-pointer backdrop-blur-xl ring-1 ring-white/10"
+            aria-label="Open 24/7 AI Disaster Emergency Assistant"
+            title="Open 24/7 NIVARAN AI Disaster Assistant"
           >
-            <div className="relative flex items-center justify-center">
-              <span className="absolute -inset-1 rounded-full bg-emerald-400 animate-ping opacity-40" />
-              <Bot className="w-5 h-5 text-emerald-300 relative z-10" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0B8F80] to-[#14B8A6] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
 
             <div className="flex flex-col text-left">
-              <span className="text-xs font-black tracking-wide flex items-center gap-1.5 leading-none">
-                <span>NIVARAN 24/7 AI</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              </span>
-              <span className="text-[10px] text-emerald-200/90 font-medium leading-none mt-1">
-                Disaster Emergency Assistant
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black tracking-wide text-white">
+                  NIVARAN AI
+                </span>
+                <span className="px-1.5 py-0.2 rounded bg-[#0B8F80]/25 text-[#2DD4BF] border border-[#0B8F80]/40 text-[9px] font-bold tracking-wider">
+                  24/7 ACTIVE
+                </span>
+              </div>
+              <span className="text-[10.5px] text-slate-300 font-medium leading-tight mt-0.5">
+                Instant Early Warning & Village Telemetry
               </span>
             </div>
           </button>
