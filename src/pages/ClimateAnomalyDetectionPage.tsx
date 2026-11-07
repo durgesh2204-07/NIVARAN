@@ -122,34 +122,34 @@ export const ClimateAnomalyDetectionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 lg:p-8">
+    <div className="w-full max-w-[1600px] mx-auto text-slate-900 dark:text-slate-100 space-y-6">
       {/* HEADER SECTION */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+      <div className="w-full">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
-                Z-Score & Isolation Forest Statistical Baseline
+                Z-Score &amp; Isolation Forest Statistical Baseline
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                 1991–2020 IMD 30-Year Normal
               </span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-              <Activity className="w-8 h-8 text-[#008060]" />
-              AI Climate Anomaly Detection
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 sm:gap-3">
+              <Activity className="w-7 h-7 sm:w-8 sm:h-8 text-[#008060] shrink-0" />
+              <span>AI Climate Anomaly Detection</span>
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
               Real-time geospatial surveillance identifying severe meteorological, hydrological, and vegetative deviations against 30-year climatological normal thresholds across Maharashtra.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
             {activeAnomaly && (
               <button
                 onClick={() => handleInspectOnMap(activeAnomaly)}
-                className="px-4 py-2.5 rounded-lg bg-[#008060] hover:bg-[#006e52] text-white text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#008060] hover:bg-[#006e52] text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
               >
                 <Globe className="w-4 h-4" />
                 <span>Locate Anomaly on GIS</span>
@@ -157,7 +157,7 @@ export const ClimateAnomalyDetectionPage: React.FC = () => {
             )}
             <button
               onClick={() => window.print()}
-              className="px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium flex items-center gap-2 transition-colors"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export Log</span>
@@ -166,53 +166,53 @@ export const ClimateAnomalyDetectionPage: React.FC = () => {
         </div>
 
         {/* METRIC CARDS BANNER */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="text-xs font-medium text-slate-500">Active Detected Anomalies</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mt-4 sm:mt-6">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="text-[11px] sm:text-xs font-medium text-slate-500">Active Detected Anomalies</div>
+            <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
               {summaryMetrics.total}
             </div>
-            <div className="text-xs text-slate-500 mt-0.5">Automated AWS Telemetry</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">Automated AWS Telemetry</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="text-xs font-medium text-slate-500">Critical (&gt; 3.0σ)</div>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="text-[11px] sm:text-xs font-medium text-slate-500">Critical (&gt; 3.0σ)</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
               {summaryMetrics.critical}
             </div>
-            <div className="text-xs text-red-600/80 mt-0.5">Immediate Warning Trigger</div>
+            <div className="text-[11px] text-red-600/80 mt-0.5">Immediate Warning Trigger</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="text-xs font-medium text-slate-500">High (2.0–3.0σ)</div>
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="text-[11px] sm:text-xs font-medium text-slate-500">High (2.0–3.0σ)</div>
+            <div className="text-xl sm:text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">
               {summaryMetrics.high}
             </div>
-            <div className="text-xs text-orange-600/80 mt-0.5">Elevated Field Advisory</div>
+            <div className="text-[11px] text-orange-600/80 mt-0.5">Elevated Field Advisory</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="text-xs font-medium text-slate-500">Moderate (1.2–2.0σ)</div>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="text-[11px] sm:text-xs font-medium text-slate-500">Moderate (1.2–2.0σ)</div>
+            <div className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
               {summaryMetrics.moderate}
             </div>
-            <div className="text-xs text-amber-600/80 mt-0.5">Surveillance Watchlist</div>
+            <div className="text-[11px] text-amber-600/80 mt-0.5">Surveillance Watchlist</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 md:col-span-1">
-            <div className="text-xs font-medium text-slate-500">Mean Anomaly Magnitude</div>
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 sm:col-span-1">
+            <div className="text-[11px] sm:text-xs font-medium text-slate-500">Mean Magnitude</div>
+            <div className="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">
               {summaryMetrics.avgZ}σ
             </div>
-            <div className="text-xs text-purple-600/80 mt-0.5">Statistical Standard Deviation</div>
+            <div className="text-[11px] text-purple-600/80 mt-0.5">Standard Deviation</div>
           </div>
         </div>
       </div>
 
       {/* MAIN TWO-COLUMN WORKSPACE */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: FILTERS & ANOMALY FEED (5 COLS) */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 w-full space-y-6">
           {/* FILTER PANEL */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-4">

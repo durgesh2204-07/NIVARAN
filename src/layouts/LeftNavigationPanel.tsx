@@ -603,7 +603,7 @@ export const LeftNavigationPanel: React.FC<LeftNavigationPanelProps> = ({
       {/* Desktop Persistent Sidebar with Smooth Spring Collapse */}
       <aside
         className={`hidden md:flex flex-col h-full shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-20 ${
-          isCollapsed ? 'w-16' : 'w-64 lg:w-72'
+          isCollapsed ? 'w-16' : 'w-60 lg:w-64 xl:w-72'
         }`}
       >
         {navContent}

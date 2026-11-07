@@ -60,6 +60,7 @@ import { Nivaran247AiChatbot } from '../components/Nivaran247AiChatbot';
 interface NavTabItem {
   to: string;
   labelEn: string;
+  shortLabelEn?: string;
   labelHi: string;
   labelMr: string;
   descEn?: string;
@@ -109,6 +110,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/dashboard',
     labelEn: 'Overview Dashboard',
+    shortLabelEn: 'Overview',
     labelHi: 'Overview Dashboard',
     labelMr: 'Overview Dashboard',
     icon: BarChart3,
@@ -117,6 +119,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/map',
     labelEn: 'Command Map',
+    shortLabelEn: 'Command Map',
     labelHi: 'Command Map',
     labelMr: 'Command Map',
     icon: Globe,
@@ -125,6 +128,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/climate-vulnerability',
     labelEn: 'AI Village Climate Vulnerability Score',
+    shortLabelEn: 'Vulnerability',
     labelHi: 'AI Village Climate Vulnerability Score',
     labelMr: 'AI Village Climate Vulnerability Score',
     icon: Gauge,
@@ -133,6 +137,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/climate-impact-prediction',
     labelEn: 'AI Climate Impact Prediction',
+    shortLabelEn: 'Impact Prediction',
     labelHi: 'AI Climate Impact Prediction',
     labelMr: 'AI Climate Impact Prediction',
     icon: TrendingUp,
@@ -141,6 +146,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/climate-anomaly-detection',
     labelEn: 'AI Climate Anomaly Detection',
+    shortLabelEn: 'Anomaly Detection',
     labelHi: 'AI Climate Anomaly Detection',
     labelMr: 'AI Climate Anomaly Detection',
     icon: Activity,
@@ -149,6 +155,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/hazard-map',
     labelEn: 'Disaster Monitoring',
+    shortLabelEn: 'Monitoring',
     labelHi: 'Disaster Monitoring',
     labelMr: 'Disaster Monitoring',
     icon: AlertTriangle,
@@ -157,6 +164,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/disaster-history',
     labelEn: 'India Disaster History',
+    shortLabelEn: 'Disaster History',
     labelHi: 'India Disaster History',
     labelMr: 'India Disaster History',
     icon: History,
@@ -165,6 +173,7 @@ const PRIMARY_NAV_TABS: NavTabItem[] = [
   {
     to: '/alerts',
     labelEn: 'Disaster Alerts',
+    shortLabelEn: 'Alerts',
     labelHi: 'Disaster Alerts',
     labelMr: 'Disaster Alerts',
     icon: Bell,
@@ -963,7 +972,7 @@ export const AppLayout: React.FC = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-[12.5px] font-semibold transition-colors duration-150 shrink-0 select-none ${
+                    `relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-colors duration-150 shrink-0 select-none ${
                       isActive
                         ? 'text-white font-bold'
                         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-[#172F46] hover:text-slate-900 dark:hover:text-white'
@@ -981,7 +990,8 @@ export const AppLayout: React.FC = () => {
                       )}
                       <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
                         <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-                        <span>{label}</span>
+                        <span className="hidden 2xl:inline whitespace-nowrap">{label}</span>
+                        <span className="inline 2xl:hidden whitespace-nowrap">{item.shortLabelEn || label}</span>
                         {badgeCount && (
                           <span className="ml-1 px-1.5 py-0.2 text-[9.5px] font-mono font-bold rounded-full bg-[#DC2626] text-white">
                             {badgeCount}
@@ -1004,106 +1014,6 @@ export const AppLayout: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* MOBILE SLIDE-DOWN DRAWER MENU */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-[#D1E7DD] p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-            {/* Mobile District Selector */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-[#059669] uppercase">
-                {UI_STRINGS.adminRegion[language]}
-              </label>
-              <select
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="w-full bg-[#F4F9F5] text-[#0F291E] border border-[#D1E7DD] rounded-md px-2.5 py-1.5 text-xs font-semibold"
-              >
-                {DISTRICT_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {language === 'mr' ? opt.mr : language === 'hi' ? opt.hi : opt.en}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Mobile Role Switcher */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-[#059669] uppercase">
-                {UI_STRINGS.operatingRole[language]}
-              </label>
-              <select
-                value={user.organisationType || 'state'}
-                onChange={(e) =>
-                  switchOrganisationQuick(e.target.value as OrganisationType)
-                }
-                className="w-full bg-[#F4F9F5] text-[#0F291E] border border-[#D1E7DD] rounded-md px-2.5 py-1.5 text-xs font-semibold"
-              >
-                {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {language === 'mr' ? opt.mr : language === 'hi' ? opt.hi : opt.en}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Mobile Navigation Links */}
-            <div className="space-y-3 pt-2 border-t border-[#D1E7DD]">
-              {ALL_MODULES_GROUPS.map((grp) => {
-                const visibleItems = grp.items.filter((it) =>
-                  it.roles.includes(user.role)
-                );
-                if (visibleItems.length === 0) return null;
-
-                return (
-                  <div key={grp.groupTitleEn} className="space-y-1">
-                    <div className="text-[10px] font-bold text-[#059669] uppercase px-1">
-                      {getNavGroupTitle(grp, language)}
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {visibleItems.map((it) => {
-                        const Icon = it.icon;
-                        const label = getNavTabLabel(it, language);
-                        return (
-                          <NavLink
-                            key={it.to}
-                            to={it.to}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className={({ isActive }) =>
-                              `flex items-center gap-2 px-2.5 py-2 rounded-md text-xs font-semibold transition-colors ${
-                                isActive
-                                  ? 'bg-[#059669] text-white font-bold'
-                                  : 'bg-[#F4F9F5] text-[#355344] hover:text-[#0F291E]'
-                              }`
-                            }
-                          >
-                            <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-                            <span className="truncate">{label}</span>
-                          </NavLink>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Mobile User & Sign out */}
-            <div className="pt-3 border-t border-[#D1E7DD] flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-[#0F291E]">{user.name}</div>
-                <div className="text-[10px] text-[#355344]">{user.unitName || user.designation}</div>
-              </div>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="px-3 py-1.5 rounded-md bg-red-100 text-red-700 text-xs font-bold flex items-center gap-1.5 hover:bg-red-200"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>{UI_STRINGS.logout[language]}</span>
-              </button>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* =====================================================================
@@ -1131,12 +1041,10 @@ export const AppLayout: React.FC = () => {
         </div>
       )}
 
-
-
       {/* =====================================================================
-          MAIN WORKSPACE: Collapsible 19-Module Left Sidebar + GIS / Decision Surface
+          MAIN WORKSPACE: Collapsible Left Sidebar + GIS / Decision Surface
           ===================================================================== */}
-      <div className="flex flex-1 min-h-0 relative">
+      <div className="flex flex-1 min-h-0 relative w-full overflow-hidden">
         <LeftNavigationPanel
           isCollapsed={leftNavCollapsed}
           onToggleCollapse={() => setLeftNavCollapsed((c) => !c)}
@@ -1145,7 +1053,7 @@ export const AppLayout: React.FC = () => {
           language={language}
           userRole={user.role}
         />
-        <main className="flex-1 min-w-0 p-3 md:p-4.5 pb-20 md:pb-6 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 min-w-0 w-full p-2.5 sm:p-4 lg:p-6 pb-24 md:pb-8 overflow-x-hidden overflow-y-auto">
           <AnimatePresence mode="wait" initial={false}>
             <PageTransition key={location.pathname} transitionKey={location.pathname}>
               <Outlet context={{ openVillageDrawer }} />
@@ -1157,22 +1065,30 @@ export const AppLayout: React.FC = () => {
       {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white text-[#0F291E] border-t border-[#D1E7DD] flex items-center justify-around py-1 px-1 shadow-lg"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#101C2C]/95 backdrop-blur-md text-slate-800 dark:text-slate-200 border-t border-slate-200 dark:border-[#1E3A5F] flex items-center justify-around py-1 px-1 shadow-lg"
       >
-        {allowedPrimaryTabs.slice(0, 5).map((item) => {
+        {[
+          { to: '/dashboard', label: 'Overview', icon: BarChart3 },
+          { to: '/map', label: 'GIS Map', icon: Globe },
+          { to: '/climate-vulnerability', label: 'Vulnerability', icon: Gauge },
+          { to: '/climate-impact-prediction', label: 'Impact', icon: TrendingUp },
+          { to: '/climate-anomaly-detection', label: 'Anomaly', icon: Activity },
+        ].map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-1 px-2 rounded text-[10px] font-medium min-h-[48px] active:scale-95 transition-all duration-150 ${
-                  isActive ? 'text-[#059669] font-bold' : 'text-[#355344]'
+                `flex flex-col items-center justify-center py-1 px-1 rounded-lg text-[10px] font-semibold min-h-[48px] active:scale-95 transition-all duration-150 ${
+                  isActive
+                    ? 'text-[#008060] dark:text-[#10B981] font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`
               }
             >
-              <Icon className="w-4 h-4 mb-0.5" strokeWidth={1.75} />
-              <span className="truncate max-w-[64px]">{getNavTabLabel(item, language)}</span>
+              <Icon className="w-4 h-4 mb-0.5" strokeWidth={1.8} />
+              <span className="truncate max-w-[66px] leading-tight text-center">{item.label}</span>
             </NavLink>
           );
         })}

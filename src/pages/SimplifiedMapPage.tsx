@@ -4294,60 +4294,60 @@ export const SimplifiedMapPage: React.FC = () => {
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Dedicated 4-Type Accurate Basemap Switcher (Street · Satellite · Topo · Dark GIS) */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 hidden md:flex items-center p-1 rounded-2xl bg-white/95 dark:bg-[#101C2C]/95 backdrop-blur-md border border-slate-200/90 dark:border-[#1E3A5F] shadow-lg gap-1">
+        <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 z-10 flex items-center p-1 rounded-2xl bg-white/95 dark:bg-[#101C2C]/95 backdrop-blur-md border border-slate-200/90 dark:border-[#1E3A5F] shadow-lg gap-0.5 sm:gap-1 max-w-[95vw] overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setBasemapMode('street')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               basemapMode === 'street'
                 ? 'bg-[#008060] text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
             title="Street Map — Accurate Roads & Administrative Settlements (OpenStreetMap)"
           >
-            <MapIcon className="w-3.5 h-3.5" />
+            <MapIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             <span>Street</span>
           </button>
 
           <button
             type="button"
             onClick={() => setBasemapMode('satellite')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               basemapMode === 'satellite'
                 ? 'bg-[#008060] text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
             title="Satellite Map — High-Resolution Aerial Imagery with Roads & Place Labels"
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             <span>Satellite</span>
           </button>
 
           <button
             type="button"
             onClick={() => setBasemapMode('topo')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               basemapMode === 'topo'
                 ? 'bg-[#008060] text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
             title="Topographic Map — Contours, Mountain Relief & Elevation Terrain (Esri Topo)"
           >
-            <Mountain className="w-3.5 h-3.5" />
+            <Mountain className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             <span>Topo</span>
           </button>
 
           <button
             type="button"
             onClick={() => setBasemapMode('dark')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               basemapMode === 'dark'
                 ? 'bg-[#0B1F33] text-[#14B8A6] border border-[#14B8A6]/40 shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
             title="Dark GIS Map — High-Contrast Mission Control Basemap (CartoDB Dark Matter)"
           >
-            <Moon className="w-3.5 h-3.5" />
+            <Moon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             <span>Dark GIS</span>
           </button>
 
@@ -4357,14 +4357,14 @@ export const SimplifiedMapPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIs3D(false)}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+            className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
               !is3D
                 ? 'bg-[#008060] text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#172F46]'
             }`}
             title="2D Standard Planar View (Flat Pitch 0°)"
           >
-            <MapIcon className="w-3.5 h-3.5" />
+            <MapIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             <span>2D</span>
           </button>
 

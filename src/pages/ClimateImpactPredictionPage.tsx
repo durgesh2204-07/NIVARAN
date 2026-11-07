@@ -130,12 +130,12 @@ export const ClimateImpactPredictionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 lg:p-8">
+    <div className="w-full max-w-[1600px] mx-auto text-slate-900 dark:text-slate-100 space-y-6">
       {/* HEADER SECTION */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+      <div className="w-full">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 Copernicus & IMD Numerical Ensemble
@@ -144,26 +144,26 @@ export const ClimateImpactPredictionPage: React.FC = () => {
                 8 Climate Impact Categories
               </span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-              <TrendingUp className="w-8 h-8 text-[#008060]" />
-              AI Climate Impact Prediction Engine
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 sm:gap-3">
+              <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-[#008060] shrink-0" />
+              <span>AI Climate Impact Prediction Engine</span>
             </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
               Forecasting localized multi-hazard impacts on agriculture, water resources, human settlements, and civil infrastructure with baseline comparison and preventive directives.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={handleInspectOnMap}
-              className="px-4 py-2.5 rounded-lg bg-[#008060] hover:bg-[#006e52] text-white text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#008060] hover:bg-[#006e52] text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
             >
               <Globe className="w-4 h-4" />
               <span>View Impact Zones on GIS</span>
             </button>
             <button
               onClick={() => window.print()}
-              className="px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium flex items-center gap-2 transition-colors"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export Directive</span>
@@ -172,50 +172,50 @@ export const ClimateImpactPredictionPage: React.FC = () => {
         </div>
 
         {/* HORIZON SELECTOR PILLS */}
-        <div className="flex flex-wrap items-center gap-3 mt-6">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mr-2 flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mt-4 sm:mt-5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mr-1 flex items-center gap-1.5">
             <Calendar className="w-4 h-4 text-[#008060]" />
-            Prediction Horizon:
+            Horizon:
           </span>
           <button
             onClick={() => setSelectedHorizon('horizon_24_72h')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
               selectedHorizon === 'horizon_24_72h'
                 ? 'bg-[#008060] text-white border-[#008060] shadow-sm'
                 : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-[#008060]'
             }`}
           >
-            Immediate: 24 to 72 Hours (AWS Nowcast)
+            Immediate: 24–72 Hours
           </button>
           <button
             onClick={() => setSelectedHorizon('horizon_seasonal')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
               selectedHorizon === 'horizon_seasonal'
                 ? 'bg-[#008060] text-white border-[#008060] shadow-sm'
                 : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-[#008060]'
             }`}
           >
-            Seasonal: 3-Month Monsoon Window
+            Seasonal: 3-Month Window
           </button>
           <button
             onClick={() => setSelectedHorizon('horizon_2030_2050')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
               selectedHorizon === 'horizon_2030_2050'
                 ? 'bg-[#008060] text-white border-[#008060] shadow-sm'
                 : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-[#008060]'
             }`}
           >
-            Decadal Scenario: 2030–2050 (+1.5°C Warming)
+            Decadal: 2030–2050 (+1.5°C)
           </button>
         </div>
       </div>
 
       {/* 8 IMPACT CATEGORIES CAROUSEL/GRID */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-          Select Hazard & Impact Category:
+      <div className="w-full">
+        <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+          Select Hazard &amp; Impact Category:
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-2.5">
           {IMPACT_CATEGORIES.map((cat) => {
             const isSelected = cat.id === selectedCategory;
             return (
@@ -250,7 +250,7 @@ export const ClimateImpactPredictionPage: React.FC = () => {
       </div>
 
       {/* WORKSPACE GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: LOCATION SELECTOR (4 COLS) */}
         <div className="lg:col-span-4 space-y-6">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -432,7 +432,7 @@ export const ClimateImpactPredictionPage: React.FC = () => {
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
                 Estimated Exposure & Impact Metrics
               </h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 text-center">
                   <div className="text-xs text-slate-500">Exposed Population</div>
                   <div className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
