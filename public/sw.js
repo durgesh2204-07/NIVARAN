@@ -1,5 +1,5 @@
-const CACHE_NAME = 'nivaran-command-cache-v5';
-const TILE_CACHE_NAME = 'nivaran-map-tiles-v5';
+const CACHE_NAME = 'nivaran-command-cache-v6';
+const TILE_CACHE_NAME = 'nivaran-map-tiles-v6';
 
 self.addEventListener('install', (event) => {
   const scope = self.registration.scope;

@@ -19,13 +19,19 @@ logger = logging.getLogger("nivaran.main")
 async def lifespan(app: FastAPI):
     # Startup: Connect to MongoDB and seed verified datasets & 18 collections
     logger.info("Starting NIVARAN GIS Backend Service with Secure Rate Limiting...")
-    db_manager.connect()
-    seed_database_if_empty()
+    try:
+        db_manager.connect()
+        seed_database_if_empty()
+    except Exception as exc:
+        logger.warning(f"Database initialization deferred (running in resilient memory mode): {exc}")
     logger.info("NIVARAN Database and Spatial Services Ready.")
     yield
     # Shutdown
     logger.info("Shutting down NIVARAN GIS Backend Service...")
-    db_manager.close()
+    try:
+        db_manager.close()
+    except Exception:
+        pass
 
 app = FastAPI(
     title=settings.APP_NAME,

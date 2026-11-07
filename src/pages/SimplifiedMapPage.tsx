@@ -886,6 +886,7 @@ export const SimplifiedMapPage: React.FC = () => {
           esri_sat: {
             type: 'raster',
             tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
               'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             ],
             tileSize: 256,
@@ -895,6 +896,7 @@ export const SimplifiedMapPage: React.FC = () => {
             type: 'raster',
             tiles: [
               'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
             ],
             tileSize: 256,
             maxzoom: 18,
@@ -903,6 +905,7 @@ export const SimplifiedMapPage: React.FC = () => {
             type: 'raster',
             tiles: [
               'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
             ],
             tileSize: 256,
             maxzoom: 18,
@@ -1493,7 +1496,7 @@ export const SimplifiedMapPage: React.FC = () => {
         map.setLayoutProperty(
           'basemap-hillshade',
           'visibility',
-          is3D || basemapMode === 'topo' ? 'visible' : 'none'
+          is3D ? 'visible' : 'none'
         );
         map.setPaintProperty(
           'basemap-hillshade',

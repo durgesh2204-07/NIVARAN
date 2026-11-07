@@ -1066,7 +1066,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedDistrictDrilldown: 'All',
   selectedDistrict: 'All',
   selectedSiteId: 'site-01',
-  basemap: 'satellite',
+  basemap: 'osm',
   coordFormat: 'DD',
   sidebarCollapsed: false,
   map3dEnabled: true,

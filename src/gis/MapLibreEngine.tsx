@@ -1150,11 +1150,44 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
       style: {
         version: 8,
         sources: {
-          'basemap-raster': {
+          osm_street: {
             type: 'raster',
-            tiles: currentRaster.tiles,
+            tiles: getStreetBasemapConfig().tiles,
             tileSize: 256,
-            attribution: currentRaster.attribution,
+            maxzoom: 19,
+          },
+          esri_sat: {
+            type: 'raster',
+            tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            maxzoom: 18,
+          },
+          esri_roads_overlay: {
+            type: 'raster',
+            tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            maxzoom: 18,
+          },
+          esri_labels_overlay: {
+            type: 'raster',
+            tiles: [
+              'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+            ],
+            tileSize: 256,
+            maxzoom: 18,
+          },
+          open_topo: {
+            type: 'raster',
+            tiles: getTopoBasemapConfig(getStoredMapProvider()).tiles,
+            tileSize: 256,
+            maxzoom: 19,
           },
           'terrarium-dem': {
             type: 'raster-dem',
@@ -1224,17 +1257,50 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
             type: 'background',
             paint: {
               'background-color':
-                (basemap || 'dark') === 'dark'
-                  ? '#090D14'
-                  : (basemap || 'dark') === 'terrain'
+                basemap === 'terrain'
                   ? '#EBF0E6'
-                  : '#0F2238',
+                  : basemap === 'satellite'
+                  ? '#0F1E2E'
+                  : '#F1F5F9',
             },
           },
           {
-            id: 'basemap-layer',
+            id: 'basemap-street',
             type: 'raster',
-            source: 'basemap-raster',
+            source: 'osm_street',
+            layout: { visibility: basemap === 'osm' || !basemap ? 'visible' : 'none' },
+            minzoom: 0,
+            maxzoom: 19,
+          },
+          {
+            id: 'basemap-satellite',
+            type: 'raster',
+            source: 'esri_sat',
+            layout: { visibility: basemap === 'satellite' ? 'visible' : 'none' },
+            minzoom: 0,
+            maxzoom: 18,
+          },
+          {
+            id: 'basemap-satellite-roads',
+            type: 'raster',
+            source: 'esri_roads_overlay',
+            layout: { visibility: basemap === 'satellite' ? 'visible' : 'none' },
+            minzoom: 0,
+            maxzoom: 18,
+          },
+          {
+            id: 'basemap-satellite-labels',
+            type: 'raster',
+            source: 'esri_labels_overlay',
+            layout: { visibility: basemap === 'satellite' ? 'visible' : 'none' },
+            minzoom: 0,
+            maxzoom: 18,
+          },
+          {
+            id: 'basemap-topo',
+            type: 'raster',
+            source: 'open_topo',
+            layout: { visibility: basemap === 'terrain' ? 'visible' : 'none' },
             minzoom: 0,
             maxzoom: 19,
           },
@@ -1242,11 +1308,12 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
             id: 'terrain-hillshade',
             type: 'hillshade',
             source: 'terrarium-dem',
+            layout: { visibility: viewMode === '3d' ? 'visible' : 'none' },
             paint: {
               'hillshade-exaggeration': 0.6,
               'hillshade-illumination-direction': sunAzimuth,
-              'hillshade-shadow-color': (basemap || 'dark') === 'dark' ? '#000000' : '#0B1F33',
-              'hillshade-highlight-color': (basemap || 'dark') === 'dark' ? '#1E293B' : '#FFFFFF',
+              'hillshade-shadow-color': '#0B1F33',
+              'hillshade-highlight-color': '#FFFFFF',
             },
           },
           {
@@ -2194,12 +2261,20 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
     }, 80);
 
     const applyTilesAndTerrain = () => {
-      const targetRaster = BASEMAP_RASTER_URLS[basemap] || BASEMAP_RASTER_URLS.dark;
-      const src = map.getSource('basemap-raster') as
-        | maplibregl.RasterTileSource
-        | undefined;
-      if (src && typeof src.setTiles === 'function') {
-        src.setTiles(targetRaster.tiles);
+      if (map.getLayer('basemap-street')) {
+        map.setLayoutProperty('basemap-street', 'visibility', basemap === 'osm' || !basemap ? 'visible' : 'none');
+      }
+      if (map.getLayer('basemap-satellite')) {
+        map.setLayoutProperty('basemap-satellite', 'visibility', basemap === 'satellite' ? 'visible' : 'none');
+      }
+      if (map.getLayer('basemap-satellite-roads')) {
+        map.setLayoutProperty('basemap-satellite-roads', 'visibility', basemap === 'satellite' ? 'visible' : 'none');
+      }
+      if (map.getLayer('basemap-satellite-labels')) {
+        map.setLayoutProperty('basemap-satellite-labels', 'visibility', basemap === 'satellite' ? 'visible' : 'none');
+      }
+      if (map.getLayer('basemap-topo')) {
+        map.setLayoutProperty('basemap-topo', 'visibility', basemap === 'terrain' ? 'visible' : 'none');
       }
 
       // Update solid background paint color to prevent white flashes
@@ -2207,21 +2282,26 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
         map.setPaintProperty(
           'offline-canvas-bg',
           'background-color',
-          basemap === 'dark' ? '#090D14' : basemap === 'terrain' ? '#EBF0E6' : '#0F2238'
+          basemap === 'terrain' ? '#EBF0E6' : basemap === 'satellite' ? '#0F1E2E' : '#F1F5F9'
         );
       }
 
-      // Update hillshade paint
+      // Update hillshade visibility and paint
       if (map.getLayer('terrain-hillshade')) {
+        map.setLayoutProperty(
+          'terrain-hillshade',
+          'visibility',
+          viewMode === '3d' ? 'visible' : 'none'
+        );
         map.setPaintProperty(
           'terrain-hillshade',
           'hillshade-shadow-color',
-          basemap === 'dark' ? '#000000' : '#0B1F33'
+          '#0B1F33'
         );
         map.setPaintProperty(
           'terrain-hillshade',
           'hillshade-highlight-color',
-          basemap === 'dark' ? '#1E293B' : '#FFFFFF'
+          '#FFFFFF'
         );
       }
 
@@ -2582,16 +2662,30 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
           {/* Basemap Selection */}
           <button
             type="button"
-            onClick={() => setBasemap('dark')}
+            onClick={() => setBasemap('osm')}
             className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              basemap === 'dark'
-                ? 'bg-[#0B1F33] text-[#14B8A6] border border-[#14B8A6]/60 shadow-xs ring-1 ring-[#14B8A6]/40'
+              basemap === 'osm' || !basemap
+                ? 'bg-[#008060] text-white shadow-xs ring-2 ring-emerald-300/60'
                 : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
-            title="Dark GIS Map — Tactical high-contrast dark control room basemap"
+            title="2D Street Map — High-precision OpenStreetMap road cartography"
           >
-            <Moon className="w-3.5 h-3.5" />
-            <span>Dark GIS</span>
+            <MapIcon className="w-3.5 h-3.5" />
+            <span>2D Street</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBasemap('satellite')}
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              basemap === 'satellite'
+                ? 'bg-[#008060] text-white shadow-xs ring-2 ring-emerald-300/60'
+                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+            }`}
+            title="Satellite Map — Esri high-resolution aerial imagery with street labels"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Satellite</span>
           </button>
 
           <button
@@ -2606,34 +2700,6 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
           >
             <Mountain className="w-3.5 h-3.5" />
             <span>Topo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setBasemap('osm')}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              basemap === 'osm'
-                ? 'bg-[#0284C7] text-white shadow-xs ring-2 ring-sky-300/60'
-                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
-            }`}
-            title="2D Street Map — High-precision OpenStreetMap road cartography"
-          >
-            <MapIcon className="w-3.5 h-3.5" />
-            <span>2D Street</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setBasemap('satellite')}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              basemap === 'satellite'
-                ? 'bg-[#D97706] text-white shadow-xs ring-2 ring-amber-300/60'
-                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
-            }`}
-            title="Satellite Map — Esri high-resolution aerial imagery"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>Satellite</span>
           </button>
 
           <div className="h-5 w-px bg-slate-700 mx-1 hidden sm:block" />
@@ -3197,10 +3263,9 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
                 onChange={(e) => setBasemap(e.target.value as BasemapStyle)}
                 className="neu-input w-full px-2.5 py-1.5 text-xs font-semibold"
               >
-                <option value="satellite">Google 3D Hybrid Satellite + Streets</option>
-                <option value="osm">Simple Google Street Map</option>
-                <option value="terrain">Google Topographic Terrain</option>
-                <option value="dark">Dark Control Map</option>
+                <option value="osm">2D Street Map (OpenStreetMap)</option>
+                <option value="satellite">Satellite Map (Esri High-Resolution Aerial)</option>
+                <option value="terrain">Topographic Map (Esri Topo & Elevation)</option>
               </select>
             </div>
 

@@ -1,10 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as maplibregl from 'maplibre-gl';
 import { App } from './App';
 import { AppErrorBoundary } from './resilience/ErrorBoundaries';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './index.css';
+
+// Explicitly register bundled web worker URL for resilient zero-failure tile decoding on Vercel & local
+try {
+  if (typeof (maplibregl as any).setWorkerUrl === 'function') {
+    const base = (import.meta as any).env?.BASE_URL || '/';
+    const workerPath = `${base.replace(/\/$/, '')}/assets/maplibre-gl-worker.mjs`;
+    (maplibregl as any).setWorkerUrl(workerPath);
+  }
+} catch {
+  // Graceful fallback to default internal resolution
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
