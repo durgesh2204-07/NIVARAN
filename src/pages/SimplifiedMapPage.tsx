@@ -883,6 +883,18 @@ export const SimplifiedMapPage: React.FC = () => {
             source: 'carto_dark',
             layout: { visibility: 'none' },
           },
+          {
+            id: 'basemap-hillshade',
+            type: 'hillshade',
+            source: 'terrarium_dem',
+            layout: { visibility: 'none' },
+            paint: {
+              'hillshade-exaggeration': 0.65,
+              'hillshade-shadow-color': '#000000',
+              'hillshade-highlight-color': '#FFFFFF',
+              'hillshade-accent-color': '#0B8F80',
+            },
+          },
         ],
       },
     });
@@ -1307,6 +1319,8 @@ export const SimplifiedMapPage: React.FC = () => {
     };
   }, [placingManualPin, measureMode, setManualPin, addToast]);
 
+  const prevIs3DRef = useRef<boolean>(false);
+
   // Sync Basemap (Street vs Satellite with Hybrid Labels vs Topo vs Dark) and 2D/3D Terrain + GIS Vector Layer Visibilities
   useEffect(() => {
     const map = mapRef.current;
@@ -1355,6 +1369,23 @@ export const SimplifiedMapPage: React.FC = () => {
           basemapMode === 'dark' ? 'visible' : 'none'
         );
       }
+      if (map.getLayer('basemap-hillshade')) {
+        map.setLayoutProperty(
+          'basemap-hillshade',
+          'visibility',
+          is3D || basemapMode === 'topo' ? 'visible' : 'none'
+        );
+        map.setPaintProperty(
+          'basemap-hillshade',
+          'hillshade-shadow-color',
+          basemapMode === 'dark' ? '#000000' : '#334155'
+        );
+        map.setPaintProperty(
+          'basemap-hillshade',
+          'hillshade-highlight-color',
+          basemapMode === 'dark' ? '#1E293B' : '#FFFFFF'
+        );
+      }
       if (map.getLayer('map-solid-background')) {
         map.setPaintProperty(
           'map-solid-background',
@@ -1384,17 +1415,24 @@ export const SimplifiedMapPage: React.FC = () => {
         );
       }
 
+      const was3D = prevIs3DRef.current;
+      prevIs3DRef.current = is3D;
+
       if (is3D) {
         try {
-          map.setTerrain({ source: 'terrarium_dem', exaggeration: 1.4 });
-          map.easeTo({ pitch: 62, duration: 500 });
+          map.setTerrain({ source: 'terrarium_dem', exaggeration: 1.5 });
+          if (!was3D) {
+            map.easeTo({ pitch: 60, duration: 600 });
+          }
         } catch {
           // Ignore if DEM source not ready
         }
       } else {
         try {
           map.setTerrain(null);
-          map.easeTo({ pitch: 0, bearing: 0, duration: 450 });
+          if (was3D) {
+            map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+          }
         } catch {
           // Ignore
         }
@@ -4138,6 +4176,18 @@ export const SimplifiedMapPage: React.FC = () => {
           >
             <Moon className="w-3 h-3" />
             <span>Dark</span>
+          </button>
+          <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 mx-0.5" />
+          <button
+            type="button"
+            onClick={() => setIs3D((v) => !v)}
+            className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${
+              is3D ? 'bg-[#0B1F33] text-[#38BDF8] border border-[#38BDF8]/40' : 'text-slate-600 dark:text-slate-300'
+            }`}
+            title="Toggle 3D Elevation Terrain Model (AWS Terrarium DEM)"
+          >
+            <Orbit className="w-3 h-3" />
+            <span>{is3D ? '3D' : '2D'}</span>
           </button>
         </div>
 

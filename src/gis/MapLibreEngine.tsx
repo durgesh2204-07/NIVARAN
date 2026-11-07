@@ -10,10 +10,12 @@ import {
   Copy,
   Crosshair,
   Eye,
+  Globe,
   Layers,
   Map as MapIcon,
   MapPin,
   Maximize2,
+  Moon,
   Mountain,
   Navigation,
   Orbit,
@@ -1136,10 +1138,9 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const initialBasemapKey: BasemapStyle =
-      viewMode === 'google2d' ? 'osm' : basemap;
+    const initialBasemapKey: BasemapStyle = basemap || 'dark';
     const currentRaster =
-      BASEMAP_RASTER_URLS[initialBasemapKey] || BASEMAP_RASTER_URLS.osm;
+      BASEMAP_RASTER_URLS[initialBasemapKey] || BASEMAP_RASTER_URLS.dark;
     const initialData = buildMapGeoJsonData();
 
     const map = new maplibregl.Map({
@@ -1224,7 +1225,14 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
           {
             id: 'offline-canvas-bg',
             type: 'background',
-            paint: { 'background-color': '#0F2238' },
+            paint: {
+              'background-color':
+                (basemap || 'dark') === 'dark'
+                  ? '#090D14'
+                  : (basemap || 'dark') === 'terrain'
+                  ? '#EBF0E6'
+                  : '#0F2238',
+            },
           },
           {
             id: 'basemap-layer',
@@ -1238,10 +1246,10 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
             type: 'hillshade',
             source: 'terrarium-dem',
             paint: {
-              'hillshade-exaggeration': 0.5,
+              'hillshade-exaggeration': 0.6,
               'hillshade-illumination-direction': sunAzimuth,
-              'hillshade-shadow-color': '#0B1F33',
-              'hillshade-highlight-color': '#FFFFFF',
+              'hillshade-shadow-color': (basemap || 'dark') === 'dark' ? '#000000' : '#0B1F33',
+              'hillshade-highlight-color': (basemap || 'dark') === 'dark' ? '#1E293B' : '#FFFFFF',
             },
           },
           {
@@ -2176,7 +2184,9 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
     viewMode,
   ]);
 
-  // Sync View Mode (Separate Simple Google Street Map vs Separate 3D Terrain Map vs Split View)
+  // Sync View Mode & Basemaps (Dark GIS, Topo, 2D Street, Satellite, 3D DEM, Split)
+  const prevViewModeRef = useRef<'google2d' | '3d' | 'split'>(viewMode);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -2186,44 +2196,74 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
       googleSecondaryMapRef.current?.resize();
     }, 80);
 
-    if (!map.isStyleLoaded()) return;
+    const applyTilesAndTerrain = () => {
+      const targetRaster = BASEMAP_RASTER_URLS[basemap] || BASEMAP_RASTER_URLS.dark;
+      const src = map.getSource('basemap-raster') as
+        | maplibregl.RasterTileSource
+        | undefined;
+      if (src && typeof src.setTiles === 'function') {
+        src.setTiles(targetRaster.tiles);
+      }
 
-    if (viewMode === 'google2d') {
-      setMap3dEnabled(false);
-      const src = map.getSource('basemap-raster') as
-        | maplibregl.RasterTileSource
-        | undefined;
-      if (src && typeof src.setTiles === 'function') {
-        src.setTiles(BASEMAP_RASTER_URLS.osm.tiles);
+      // Update solid background paint color to prevent white flashes
+      if (map.getLayer('offline-canvas-bg')) {
+        map.setPaintProperty(
+          'offline-canvas-bg',
+          'background-color',
+          basemap === 'dark' ? '#090D14' : basemap === 'terrain' ? '#EBF0E6' : '#0F2238'
+        );
       }
-      try {
-        map.setTerrain(null);
-        map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
-      } catch {
-        // ignore
+
+      // Update hillshade paint
+      if (map.getLayer('terrain-hillshade')) {
+        map.setPaintProperty(
+          'terrain-hillshade',
+          'hillshade-shadow-color',
+          basemap === 'dark' ? '#000000' : '#0B1F33'
+        );
+        map.setPaintProperty(
+          'terrain-hillshade',
+          'hillshade-highlight-color',
+          basemap === 'dark' ? '#1E293B' : '#FFFFFF'
+        );
       }
-    } else {
-      setMap3dEnabled(true);
-      const nextRaster =
-        BASEMAP_RASTER_URLS[basemap === 'osm' ? 'satellite' : basemap] ||
-        BASEMAP_RASTER_URLS.satellite;
-      const src = map.getSource('basemap-raster') as
-        | maplibregl.RasterTileSource
-        | undefined;
-      if (src && typeof src.setTiles === 'function') {
-        src.setTiles(nextRaster.tiles);
-      }
-      if (!reduce3dQuality) {
+
+      const was2D = prevViewModeRef.current === 'google2d';
+      prevViewModeRef.current = viewMode;
+
+      if (viewMode === 'google2d') {
+        setMap3dEnabled(false);
         try {
-          map.setTerrain({
-            source: 'terrarium-dem',
-            exaggeration: terrainExaggeration,
-          });
-          map.easeTo({ pitch: 62, bearing: -18, duration: 600 });
+          map.setTerrain(null);
+          if (!was2D) {
+            map.easeTo({ pitch: 0, bearing: 0, duration: 500 });
+          }
         } catch {
           // ignore
         }
+      } else {
+        setMap3dEnabled(true);
+        if (!reduce3dQuality) {
+          try {
+            map.setTerrain({
+              source: 'terrarium-dem',
+              exaggeration: terrainExaggeration,
+            });
+            if (was2D) {
+              map.easeTo({ pitch: 60, bearing: -18, duration: 600 });
+            }
+          } catch {
+            // ignore
+          }
+        }
       }
+    };
+
+    if (map.isStyleLoaded()) {
+      applyTilesAndTerrain();
+    } else {
+      map.once('load', applyTilesAndTerrain);
+      map.once('styledata', applyTilesAndTerrain);
     }
   }, [viewMode, basemap, terrainExaggeration, reduce3dQuality, setMap3dEnabled]);
 
@@ -2538,47 +2578,110 @@ export const MapLibreEngine: React.FC<MapLibreEngineProps> = ({
   return (
     <div className="relative w-full rounded-[14px] overflow-hidden border border-[var(--border)] flex flex-col bg-[#0B1F33]">
       {/* =====================================================================
-          1. SEPARATE MAP SECTION TABS: [1] SIMPLE GOOGLE STREET MAP  |  [2] 3D TERRAIN MAP  |  [3] SPLIT VIEW
+          1. DIRECT MAP CONTROL BAR: [Dark GIS] [Topo] [2D Street] [Satellite] | [2D Flat] [3D DEM] [Split View]
           ===================================================================== */}
       <div className="w-full bg-[#071524] border-b border-slate-800 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Basemap Selection */}
+          <button
+            type="button"
+            onClick={() => setBasemap('dark')}
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              basemap === 'dark'
+                ? 'bg-[#0B1F33] text-[#14B8A6] border border-[#14B8A6]/60 shadow-xs ring-1 ring-[#14B8A6]/40'
+                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+            }`}
+            title="Dark GIS Map — Tactical high-contrast dark control room basemap"
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span>Dark GIS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBasemap('terrain')}
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              basemap === 'terrain'
+                ? 'bg-[#008060] text-white shadow-xs ring-2 ring-emerald-300/60'
+                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+            }`}
+            title="Topographic Map — Contours, physical terrain relief & mountain elevations"
+          >
+            <Mountain className="w-3.5 h-3.5" />
+            <span>Topo</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBasemap('osm')}
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              basemap === 'osm'
+                ? 'bg-[#0284C7] text-white shadow-xs ring-2 ring-sky-300/60'
+                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+            }`}
+            title="2D Street Map — High-precision OpenStreetMap road cartography"
+          >
+            <MapIcon className="w-3.5 h-3.5" />
+            <span>2D Street</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBasemap('satellite')}
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              basemap === 'satellite'
+                ? 'bg-[#D97706] text-white shadow-xs ring-2 ring-amber-300/60'
+                : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+            }`}
+            title="Satellite Map — Esri high-resolution aerial imagery"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Satellite</span>
+          </button>
+
+          <div className="h-5 w-px bg-slate-700 mx-1 hidden sm:block" />
+
+          {/* 2D vs 3D Perspective Mode */}
           <button
             type="button"
             onClick={() => setViewMode('google2d')}
-            className={`px-4 py-2 rounded-[10px] text-xs font-extrabold flex items-center gap-2 transition-all ${
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === 'google2d'
-                ? 'bg-[#0284C7] text-white shadow-md ring-2 ring-sky-300/60'
+                ? 'bg-[#0369A1] text-white shadow-xs ring-1 ring-sky-300/60'
                 : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
+            title="Flat 2D Projection — 0° Nadir Orthographic View"
           >
-            <MapIcon className="w-4 h-4" strokeWidth={2} />
-            <span>1. Live Open GIS Street Map (Live GPS & All Locations)</span>
+            <MapPin className="w-3.5 h-3.5" />
+            <span>2D Flat</span>
           </button>
 
           <button
             type="button"
             onClick={() => setViewMode('3d')}
-            className={`px-4 py-2 rounded-[10px] text-xs font-extrabold flex items-center gap-2 transition-all ${
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === '3d'
-                ? 'bg-[#0B8F80] text-white shadow-md ring-2 ring-teal-300/60'
+                ? 'bg-[#0B8F80] text-white shadow-xs ring-2 ring-teal-300/60'
                 : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
+            title="3D DEM Terrain — 60° Oblique Digital Elevation Model"
           >
-            <Mountain className="w-4 h-4" strokeWidth={2} />
-            <span>2. 3D Terrain & Elevation Map (62° Tilt)</span>
+            <Orbit className="w-3.5 h-3.5" />
+            <span>3D DEM</span>
           </button>
 
           <button
             type="button"
             onClick={() => setViewMode('split')}
-            className={`px-3.5 py-2 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === 'split'
-                ? 'bg-[#16A34A] text-white shadow-md'
+                ? 'bg-[#16A34A] text-white shadow-xs ring-2 ring-green-300/60'
                 : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
             }`}
+            title="Split Dual View — Side-by-Side 2D & 3D Maps"
           >
-            <Columns className="w-4 h-4" strokeWidth={1.75} />
-            <span>3. Side-by-Side Both Maps</span>
+            <Columns className="w-3.5 h-3.5" />
+            <span>Split View</span>
           </button>
         </div>
 
